@@ -14,7 +14,9 @@ class Settings(BaseSettings):
 
     sqlite_db_name: str = Field(..., alias="SQLITE_DB_NAME")
 
-    postgres_user: str = Field(..., alias="POSTGRES_USER")  # Имя пользователя базы данных
+    postgres_user: str = Field(
+        ..., alias="POSTGRES_USER"
+    )  # Имя пользователя базы данных
     postgres_password: SecretStr = Field(..., alias="POSTGRES_PASSWORD")
     # Пароль пользователя, хранится как SecretStr для безопасности
     postgres_db: str = Field(..., alias="POSTGRES_DB")  # Название базы данных

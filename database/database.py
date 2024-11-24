@@ -45,6 +45,8 @@ updated_at = Annotated[
     ),
 ]
 
+intpk = Annotated[int, mapped_column(primary_key=True)]
+
 
 class Base(DeclarativeBase):
     # Поле для хранения даты и времени создания записи.  Автоматически заполняется при создании.

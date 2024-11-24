@@ -1,7 +1,4 @@
-import asyncio
-
 import redis
-
 import redis.asyncio
 
 from settings import Settings

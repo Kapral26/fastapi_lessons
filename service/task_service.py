@@ -2,7 +2,7 @@ import dataclasses
 
 from repository.task_cache_repository import TaskCacheRepository
 from repository.task_repository import TaskRepository
-from schemas.Tasks import TaskDTO
+from schemas.tasks import TaskDTO
 
 
 @dataclasses.dataclass

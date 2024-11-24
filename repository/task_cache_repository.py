@@ -2,12 +2,11 @@ import json
 
 from redis import Redis
 
-from schemas.Tasks import TaskDTO
+from schemas.tasks import TaskDTO
 
 
 class TaskCacheRepository:
-    """
-    A repository class for caching tasks in Redis.
+    """A repository class for caching tasks in Redis.
 
     This class provides methods for getting and setting tasks in Redis.
     """
@@ -16,8 +15,7 @@ class TaskCacheRepository:
         self.redis = redis_session
 
     def get_tasks(self) -> list[TaskDTO] | None:
-        """
-        Получает список задач из Redis.
+        """Получает список задач из Redis.
 
         Описание:
         - Использует Redis pipeline для выполнения нескольких команд.
@@ -35,12 +33,14 @@ class TaskCacheRepository:
             response = pipe.execute()
             # pipe.execute возвращает байтовое представление объектов,
             # поэтому нужно преобразовать в строки, потом уже в json и только после этого в Модель
-            tasks = [TaskDTO.model_validate(json.loads(x.decode("utf8"))) for x in response[0]]
+            tasks = [
+                TaskDTO.model_validate(json.loads(x.decode("utf8")))
+                for x in response[0]
+            ]
             return tasks
 
     def set_tasks(self, tasks: list[TaskDTO]) -> None:
-        """
-        Сохраняет список задач в Redis.
+        """Сохраняет список задач в Redis.
 
         Описание:
         - Удаляет текущий список задач (если он существует) в ключе "tasks".

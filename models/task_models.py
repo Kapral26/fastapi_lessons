@@ -1,14 +1,10 @@
-from typing import Annotated
-
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from database.database import Base
+from database.database import Base, intpk
 from settings import Settings
 
 settings = Settings()
-
-intpk = Annotated[int, mapped_column(primary_key=True)]
 
 
 class CategoryModel(Base):
@@ -42,14 +38,3 @@ class TaskModel(Base):
     category: Mapped[CategoryModel] = relationship(
         back_populates="tasks",
     )
-
-
-class UserModel(Base):
-    """Модель пользователя."""
-
-    __tablename__ = "user"
-
-    id: Mapped[intpk]
-    name: Mapped[str]
-    email: Mapped[str]
-    password: Mapped[str]

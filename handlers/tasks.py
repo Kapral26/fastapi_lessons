@@ -5,10 +5,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
-from database import TaskModel
 from dependencies import get_tasks_repository, get_tasks_service
+from models import TaskModel
 from repository import TaskRepository
-from schemas.Tasks import TaskDTO
+from schemas.tasks import TaskDTO
 from service.task_service import TaskService
 
 # APIRouter - Дает возможность регистрировать роуты
@@ -25,8 +25,7 @@ router = APIRouter(
 async def get_async_tasks(
     task_service: Annotated[TaskService, Depends(get_tasks_service)],
 ) -> list[TaskDTO] | None:
-    """
-    Get all tasks from the database.
+    """Get all tasks from the database.
 
     This endpoint returns a list of TaskDTO objects, which contains all the tasks in the database.
     The list will be empty if there are no tasks.
@@ -42,8 +41,7 @@ async def _create_task(
     task: TaskDTO,
     task_repository: Annotated[TaskRepository, Depends(get_tasks_repository)],
 ) -> None:
-    """
-    Можно обратить внимание, что не указан как /create_task
+    """Можно обратить внимание, что не указан как /create_task
     Так, как это POST запрос, оно является явным указанием.
     """
     await task_repository.create_task(task)

@@ -1,0 +1,19 @@
+# Byte-compiled Python files
+__pycache__/
+*.py[cod]
+
+# Log files
+*.log
+
+# Redis files
+redis.dump
+
+# IDE files
+.vscode/
+.idea/
+
+# Other
+*.env
+/temp
+.DS_Store
+Thumbs.db

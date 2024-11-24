@@ -26,11 +26,11 @@ build-backend = "poetry.core.masonry.api"
 
 
 [tool.ruff]
-# Enable the pycodestyle (`E`) and Pyflakes (`F`) rules by default.
-# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
-# McCabe complexity (`C901`) by default.
+# Включить правила pycodestyle (E) и Pyflakes (F) по умолчанию.
+# В отличие от Flake8, Ruff не включает предупреждения pycodestyle (W) или
+# McCabe сложности (C901) по умолчанию.
 # https://docs.astral.sh/ruff/settings/#tab-size
-select = [
+lint.select = [
     # pycodestyle
     "W",
     # Pyflakes
@@ -57,32 +57,71 @@ select = [
     # pandas-vet
     "TCH",
     # flake8-type-checking
-    "ANN", #flake8-annotations
+    "ANN", # flake8-annotations
 ]
-ignore = ["F", "D107", "S608", "D212", "D205", "D400", "D415", "E722", "F401", "RUF001", "RUF002", "RUF003", "ANN101", "ANN002", "ANN003", "ANN204", "TRY003", "TRY200", "B904", ]
-# Allow autofix for all enabled rules (when `--fix`) is provided.
-fixable = ["ALL"]
-unfixable = []
-# Exclude a variety of commonly ignored directories.
-exclude = [".bzr", ".direnv", ".eggs", ".git", ".git-rewrite", ".hg", ".mypy_cache", ".nox", ".pants.d", ".pytype", ".ruff_cache", ".svn", ".tox", ".venv", "__pypackages__", "_build", "buck-out", "build", "dist", "node_modules", "venv", ]
-per-file-ignores = { }
-# Same as Black.
-line-length = 120
-# Assume Python 3.8
-target-version = "py311"
-[format]
-# Enable reformatting of code snippets in docstrings.
-docstring-code-format = true
-# Use tabs instead of 4 space indentation.
-indent-style = "tab"
-quote-style = "double"
-# Allow unused variables when underscore-prefixed.
-dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
-[lint.flake8-import-conventions]
-# Declare the banned `from` imports.
-banned-from = ["ens_settings"]
+
 [lint]
-# Enable D400 on top of the Google convention.
-extend-select = ["D400"]
-[lint.pydocstyle]
-convention = "google"
+# Разрешить автоматическое исправление всех включенных правил (при использовании `--fix`)
+fixable = ["ALL"]
+# Игнорировать следующие правила
+ignore = [
+    "F",
+    "D107",
+    "S608",
+    "D212",
+    "D205",
+    "D400",
+    "D415",
+    "E722",
+    "F401",
+    "RUF001",
+    "RUF002",
+    "RUF003",
+    "ANN101",
+    "ANN002",
+    "ANN003",
+    "ANN204",
+    "TRY003",
+    "TRY200",
+    "B904",
+]
+# Исключить следующие директории
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+per-file-ignores = { }
+# Игнорировать следующие файлы
+unfixable = []
+
+[format]
+# Включить переформатирование кода в docstring
+docstring-code-format = true
+# Использовать табуляцию вместо 4 пробелов для отступов
+indent-style = "tab"
+# Стиль кавычек
+quote-style = "double"
+# Разрешить неиспользуемые переменные с префиксом "_"
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+# Переносить аргументы методов/функций на новую строку
+max-function-args = 1
+max-function-arg-length = 40
