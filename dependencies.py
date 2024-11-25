@@ -6,6 +6,7 @@ from cache import get_redis_connection
 from database import async_session_factory
 from repository import TaskRepository, TaskCacheRepository, UserRepository
 from service import TaskService
+from service.auth import AuthService
 from service.user import UserService
 
 
@@ -59,3 +60,15 @@ def get_user_service(
     :return: a :class:`UserService` instance.
     """
     return UserService(user_repository=user_repository)
+
+
+def get_auth_service(
+    user_repository: Annotated[UserRepository, Depends(get_user_repository)],
+) -> AuthService:
+    """Create a :class:`AuthService` from the default :class:`UserRepository` and :class:`UserService`.
+
+    :param user_repository: a :class:`UserRepository` instance.
+    :param user_service: a :class:`UserService` instance.
+    :return: a :class:`AuthService` instance.
+    """
+    return AuthService(user_repository=user_repository)

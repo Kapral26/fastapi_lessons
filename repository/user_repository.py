@@ -39,3 +39,13 @@ class UserRepository:
             query_result = await session.execute(query)
             user = query_result.scalars().first()
             return user
+
+    async def get_user_by_name(self, username: str) -> UserProfile | None:
+        """Авторизация пользователя."""
+        query = select(UserProfile).where(UserProfile.username == username)
+        async with self.session_factory() as session:
+            # Сбрасываем кэш SQLAlchemy
+            session.expire_all()
+            query_result = await session.execute(query)
+            user = query_result.scalar_one_or_none()
+            return user

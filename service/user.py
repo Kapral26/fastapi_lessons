@@ -2,6 +2,7 @@ import secrets
 import string
 from dataclasses import dataclass
 
+from exceptions import UserNotFoundError, UserInvalidError
 from repository import UserRepository
 from schemas import UserLoginDTO
 
@@ -11,10 +12,10 @@ class UserService:
     user_repository: UserRepository
 
     async def create_user(self, username: str, password: str) -> UserLoginDTO:
+        """Создание нового пользователя."""
         new_user = await self.user_repository.create_user(
             username, password, self._generate_access_token()
         )
-        breakpoint()
         return UserLoginDTO.model_validate(new_user)
 
     @staticmethod
@@ -26,3 +27,4 @@ class UserService:
         """
         alphabet = string.ascii_letters + string.digits
         return "".join(secrets.choice(alphabet) for _ in range(length))
+
