@@ -4,8 +4,11 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from database.database import Base
+from models.task_models import TaskModel
+from models.user_models import UserProfile
 from settings import Settings
 
+__models__ = [TaskModel, UserProfile]
 settings = Settings()
 
 config = context.config

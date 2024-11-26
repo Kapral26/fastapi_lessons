@@ -13,7 +13,7 @@ sync_engine = create_engine(
     url=settings.database_dsn,  # dsn-url
     echo=settings.debug,  # Echo отвечает, будут ли запросы выводиться в консоль
     pool_size=5,  # Количество соединений
-    max_overflow=10,  # На сколько больше соединений можно открывать
+    max_overflow=10,  # На сколько больше соединений можно открывать  # noqa: RUF003
 )
 
 async_engine = create_async_engine(

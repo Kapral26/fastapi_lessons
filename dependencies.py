@@ -8,6 +8,7 @@ from repository import TaskRepository, TaskCacheRepository, UserRepository
 from service import TaskService
 from service.auth import AuthService
 from service.user import UserService
+from settings import Settings
 
 
 def get_tasks_repository() -> TaskRepository:
@@ -51,24 +52,25 @@ def get_user_repository() -> UserRepository:
     return UserRepository(session_factory=async_session_factory)
 
 
-def get_user_service(
-    user_repository: Annotated[UserRepository, Depends(get_user_repository)],
-) -> UserService:
-    """Create a :class:`UserService` from the default :class:`UserRepository`.
-
-    :param user_repository: a :class:`UserRepository` instance.
-    :return: a :class:`UserService` instance.
-    """
-    return UserService(user_repository=user_repository)
-
-
 def get_auth_service(
     user_repository: Annotated[UserRepository, Depends(get_user_repository)],
 ) -> AuthService:
     """Create a :class:`AuthService` from the default :class:`UserRepository` and :class:`UserService`.
 
     :param user_repository: a :class:`UserRepository` instance.
-    :param user_service: a :class:`UserService` instance.
     :return: a :class:`AuthService` instance.
     """
-    return AuthService(user_repository=user_repository)
+    return AuthService(user_repository=user_repository, settings=Settings())
+
+
+def get_user_service(
+    user_repository: Annotated[UserRepository, Depends(get_user_repository)],
+    auth_service: Annotated[AuthService, Depends(get_auth_service)],
+) -> UserService:
+    """Create a :class:`UserService` from the default :class:`UserRepository` and :class:`AuthService`.
+
+    :param user_repository: a :class:`UserRepository` instance.
+    :param auth_service: a :class:`AuthService` instance.
+    :return: a :class:`UserService` instance.
+    """
+    return UserService(user_repository=user_repository, auth_service=auth_service)

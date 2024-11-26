@@ -11,4 +11,3 @@ class UserProfile(Base):
     id: Mapped[intpk]
     username: Mapped[str] = mapped_column(nullable=False)
     password: Mapped[str] = mapped_column(nullable=False)
-    access_token: Mapped[str] = mapped_column(nullable=False)
