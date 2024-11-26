@@ -1,30 +1,23 @@
-import secrets
-import string
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-from exceptions import UserNotFoundError, UserInvalidError
 from repository import UserRepository
 from schemas import UserLoginDTO
+
+if TYPE_CHECKING:
+    from models import UserProfile
+    from service.auth import AuthService
 
 
 @dataclass
 class UserService:
     user_repository: UserRepository
+    auth_service: "AuthService"
 
     async def create_user(self, username: str, password: str) -> UserLoginDTO:
         """Создание нового пользователя."""
-        new_user = await self.user_repository.create_user(
-            username, password, self._generate_access_token()
+        new_user: UserProfile = await self.user_repository.create_user(
+            username, password
         )
-        return UserLoginDTO.model_validate(new_user)
-
-    @staticmethod
-    def _generate_access_token(length: int = 20) -> str:
-        """Генерация access token заданной длины.
-
-        :param length: Длина access token (по умолчанию 20)
-        :return: Строка access token
-        """
-        alphabet = string.ascii_letters + string.digits
-        return "".join(secrets.choice(alphabet) for _ in range(length))
-
+        access_token = self.auth_service.generate_access_token(new_user.id)
+        return UserLoginDTO(user_id=new_user.id, access_token=access_token)

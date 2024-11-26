@@ -10,7 +10,7 @@ class TaskDTO(BaseModel):
     @field_validator("pomodoro_count", "category_id")
     @classmethod
     def name_or_category_is_not_empty(cls, value: str | int | None) -> None | str | int:
-        """Проверка на пустоту названия или категории
+        """Проверка на пустоту названия или категории.
 
         Он реализован не до конца корректно - для примера.
         Если поле не пустое, то возвращает его,
@@ -23,7 +23,7 @@ class TaskDTO(BaseModel):
     @model_validator(mode="after")  # mode = 'before' - до инициализации модели.
     def model_trigger_after(self):
         """model_validator - Позволяет проверять модель целиком
-        mode - указывает, когда это необходимо делать
+        mode - указывает, когда это необходимо делать.
 
         Раз мы проверяем модель целиком, то и возвращать мы должны модель.
         """

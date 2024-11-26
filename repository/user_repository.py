@@ -15,12 +15,12 @@ class UserRepository:
     session_factory: Callable[[T], AsyncSession]
 
     async def create_user(
-        self, username: str, password: str, access_token: str
+        self, username: str, password: str
     ) -> UserProfile:
         """Создание пользователя."""
         stmnt = (
             insert(UserProfile)
-            .values(username=username, password=password, access_token=access_token)
+            .values(username=username, password=password)
             .returning(UserProfile.id)
         )
 

@@ -12,8 +12,6 @@ class Settings(BaseSettings):
     # Желательно вместо str использовать SecretStr
     # для конфиденциальных данных, например, токена бота
 
-    sqlite_db_name: str = Field(..., alias="SQLITE_DB_NAME")
-
     postgres_user: str = Field(
         ..., alias="POSTGRES_USER"
     )  # Имя пользователя базы данных
@@ -27,6 +25,9 @@ class Settings(BaseSettings):
     redis_host: str = Field(..., alias="REDIS_HOST")
     redis_port: int = Field(..., alias="REDIS_PORT")
     redis_db: int = Field(..., alias="REDIS_DB")
+
+    jwt_secret_key: SecretStr = Field(..., alias="JWT_SECRET_KEY")
+    jwt_algorithm: str = Field(..., alias="JWT_ALGORITHM")
 
     # Свойства, которые генерируют URL-адреса подключения к PostgreSQL с использованием разных драйверов
     @property

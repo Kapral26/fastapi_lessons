@@ -1,5 +1,4 @@
-from collections.abc import Callable, Sequence
-from typing import TypeVar
+from typing import TypeVar, Sequence, Callable
 
 from faker import Faker
 from sqlalchemy import select, update, delete
@@ -84,7 +83,7 @@ class TaskRepository:
 
     async def get_task_by_category_id(
         self, category_id: int
-    ) -> TaskModel | list[TaskModel] | None:
+    ) -> Sequence[TaskModel]:
         """Get a task by its category ID.
 
         :param category_id: the ID of the category to be searched
@@ -103,7 +102,7 @@ class TaskRepository:
 
     async def get_task_by_category_name(
         self, category_name: str
-    ) -> TaskModel | list[TaskModel] | None:
+    ) -> Sequence[TaskModel]:
         """Get a task by its category name.
 
         :param category_name: the name of the category to be searched
