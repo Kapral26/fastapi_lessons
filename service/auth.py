@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class AuthService:
-    """Сервис авторизации"""
+    """Сервис авторизации."""
 
     user_repository: "UserRepository"
     settings: Settings

@@ -81,9 +81,7 @@ class TaskRepository:
             await session.execute(delete(TaskModel).where(TaskModel.id == task_id))
             await session.commit()
 
-    async def get_task_by_category_id(
-        self, category_id: int
-    ) -> Sequence[TaskModel]:
+    async def get_task_by_category_id(self, category_id: int) -> Sequence[TaskModel]:
         """Get a task by its category ID.
 
         :param category_id: the ID of the category to be searched

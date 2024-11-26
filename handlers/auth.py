@@ -23,7 +23,9 @@ async def auth_user(
 ) -> UserLoginDTO:
     """Handler для авторизации пользователя."""
     try:
-        user_login_result = await user_repository.user_login(body.username, body.password)
+        user_login_result = await user_repository.user_login(
+            body.username, body.password
+        )
     except UserNotFoundError as error:
         raise HTTPException(status_code=401, detail=error.detail)
     except UserInvalidError as error:

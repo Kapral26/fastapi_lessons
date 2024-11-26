@@ -14,9 +14,7 @@ T = TypeVar("T")
 class UserRepository:
     session_factory: Callable[[T], AsyncSession]
 
-    async def create_user(
-        self, username: str, password: str
-    ) -> UserProfile:
+    async def create_user(self, username: str, password: str) -> UserProfile:
         """Создание пользователя."""
         stmnt = (
             insert(UserProfile)
