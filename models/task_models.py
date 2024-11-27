@@ -57,6 +57,7 @@ class TaskModel(Base):
             ondelete="SET NULL",
         )
     )
+    user_id: Mapped[int] = mapped_column(ForeignKey("user_profile.id"), nullable=False)
 
     category: Mapped[CategoryModel] = relationship(
         back_populates="tasks",

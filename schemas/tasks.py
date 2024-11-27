@@ -1,7 +1,13 @@
 from pydantic import BaseModel, field_validator, model_validator
 
 
-class TaskDTO(BaseModel):
+class TaskCreateSchema(BaseModel):
+    name: str | None = None
+    pomodoro_count: int
+    category_id: int | None = None
+
+
+class TaskSchema(TaskCreateSchema):
     """
     Модель данных для задачи.
 
@@ -18,9 +24,7 @@ class TaskDTO(BaseModel):
     """
 
     id: int | None = None
-    name: str | None = None
-    pomodoro_count: int
-    category_id: int | None = None
+    user_id: int
 
     # noinspection PyNestedDecorators
     @field_validator("pomodoro_count", "category_id")
@@ -54,7 +58,7 @@ class TaskDTO(BaseModel):
         from_attributes = True
 
 
-class Category(BaseModel):
+class CategorySchema(BaseModel):
     """
     Модель категории.
 

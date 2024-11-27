@@ -18,3 +18,11 @@ class UserInvalidError(Exception):
     """
 
     detail = "User password invalid"
+
+
+class TokenExpiredError(Exception):
+    detail = "Token expired"
+
+
+class TokenIsNotCorrectError(Exception):
+    detail = "Token is not correct"

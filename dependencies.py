@@ -1,13 +1,15 @@
 from typing import Annotated
 
-from fastapi import Depends
+from fastapi import Depends, security, Security, HTTPException
+from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN
 
 from cache import get_redis_connection
 from database import async_session_factory
+from exceptions import TokenIsNotCorrectError, TokenExpiredError
 from repository import TaskRepository, TaskCacheRepository, UserRepository
 from service import TaskService
-from service.auth import AuthService
-from service.user import UserService
+from service.auth_service import AuthService
+from service.user_service import UserService
 from settings import Settings
 
 
@@ -129,3 +131,22 @@ def get_user_service(
     передаются в качестве параметров функции и используются для создания экземпляра класса UserService.
     """
     return UserService(user_repository=user_repository, auth_service=auth_service)
+
+
+reusable_oauth2 = security.HTTPBearer()
+
+
+async def get_request_user_id(
+    auth_service: Annotated[AuthService, Depends(get_auth_service)],
+    token: security.http.HTTPAuthorizationCredentials = Security(reusable_oauth2),  # noqa: B008
+) -> int:
+    try:
+        user_id = auth_service.get_user_id_from_access_token(token.credentials)
+    except TokenIsNotCorrectError as error:
+        # Обычно HTTPException вызывается на уровне handlers,
+        # но т.к. данный метод по Depends вызывается только там, в таком случае допускается.
+        raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail=error.detail)
+    except TokenExpiredError as error:
+        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail=error.detail)
+    return user_id
+

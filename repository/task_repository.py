@@ -1,12 +1,12 @@
 from typing import TypeVar, Sequence, Callable
 
 from faker import Faker
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, update, delete, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from models import TaskModel, CategoryModel
-from schemas.tasks import TaskDTO
+from schemas.tasks import TaskCreateSchema
 
 T = TypeVar("T")
 
@@ -19,7 +19,7 @@ class TaskRepository:
     session_factory (Callable[[T], AsyncSession]): Фабрика асинхронных сессий.
 
     Методы:
-    create_task(self, task_data: TaskDTO) -> None: Создает новую задачу.
+    create_task(self, task_data: TaskSchema) -> None: Создает новую задачу.
     get_tasks(self) -> Sequence[TaskModel]: Получает список всех задач.
     update_task_name(self, task_id: int, new_name: str) -> type[TaskModel] | None: Обновляет имя задачи.
     get_task_by_name(self, name: str) -> TaskModel | None: Получает задачу по имени.
@@ -33,21 +33,18 @@ class TaskRepository:
     def __init__(self, session_factory: Callable[[T], AsyncSession]):
         self.session_factory = session_factory
 
-    async def create_task(self, task_data: TaskDTO) -> None:
-        """
-        Создает новую задачу.
-
-        Описание:
-        - Создает экземпляр модели TaskModel на основе данных задачи.
-        - Добавляет задачу в сессию и коммитит транзакцию.
-
-        Аргументы:
-        - task_data: Данные задачи в формате TaskDTO.
-        """
-        task_model = TaskModel(**task_data.dict())
+    async def create_task(self, task_data: TaskCreateSchema, user_id: int) -> int:
+        query = (
+            insert(TaskModel)
+            .values(**task_data.dict(), user_id=user_id)
+            .returning(TaskModel.id)
+        )
         async with self.session_factory() as session:
-            session.add(task_model)
+            task_id = (await session.execute(query)).scalar_one_or_none()
             await session.commit()
+            return task_id
+
+
 
     async def get_tasks(self) -> Sequence[TaskModel]:
         """

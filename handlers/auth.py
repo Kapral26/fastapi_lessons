@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from dependencies import get_auth_service
 from exceptions import UserNotFoundError, UserInvalidError
-from schemas import UserLoginDTO
-from schemas.users import UserModel
-from service.auth import AuthService
+from schemas import UserLoginSchema
+from schemas.users import UserSchema
+from service.auth_service import AuthService
 
 router = APIRouter(
     prefix="/auth",
@@ -14,11 +14,11 @@ router = APIRouter(
 )
 
 
-@router.post("/login", response_model=UserLoginDTO)
+@router.post("/login", response_model=UserLoginSchema)
 async def auth_user(
-    body: UserModel,
+    body: UserSchema,
     user_repository: Annotated[AuthService, Depends(get_auth_service)],
-) -> UserLoginDTO:
+) -> UserLoginSchema:
     """
     Аутентифицирует пользователя.
 
@@ -26,13 +26,13 @@ async def auth_user(
     - Пытается выполнить вход пользователя с указанными данными.
     - Если пользователь не найден, генерирует исключение UserNotFoundError.
     - Если пароль неверный, генерирует исключение UserInvalidError.
-    - Возвращает данные пользователя в формате UserLoginDTO.
+    - Возвращает данные пользователя в формате UserLoginSchema.
 
     Аргументы:
-    - body: Данные пользователя в формате UserModel.
+    - body: Данные пользователя в формате UserSchema.
 
     Возвращает:
-    - Данные пользователя в формате UserLoginDTO.
+    - Данные пользователя в формате UserLoginSchema.
     """
     try:
         user_login_result = await user_repository.user_login(

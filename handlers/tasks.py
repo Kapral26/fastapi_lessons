@@ -3,12 +3,12 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
-from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT
+from starlette.status import HTTP_204_NO_CONTENT
 
-from dependencies import get_tasks_repository, get_tasks_service
+from dependencies import get_tasks_repository, get_tasks_service, get_request_user_id
 from models import TaskModel
 from repository import TaskRepository
-from schemas.tasks import TaskDTO
+from schemas.tasks import TaskSchema, TaskCreateSchema
 from service.task_service import TaskService
 
 # APIRouter - Дает возможность регистрировать роуты
@@ -21,10 +21,10 @@ router = APIRouter(
 )
 
 
-@router.get("/all", response_model=list[TaskDTO])
+@router.get("/all", response_model=list[TaskSchema])
 async def get_async_tasks(
     task_service: Annotated[TaskService, Depends(get_tasks_service)],
-) -> list[TaskDTO] | None:
+) -> list[TaskSchema] | None:
     """
     Получение всех задач.
 
@@ -39,25 +39,17 @@ async def get_async_tasks(
     return all_tasks
 
 
-@router.post("/", status_code=HTTP_201_CREATED)
-async def _create_task(
-    task: TaskDTO,
-    task_repository: Annotated[TaskRepository, Depends(get_tasks_repository)],
-) -> None:
-    """
-    Создание новой задачи.
-
-    Описание:
-    - Создает экземпляр модели TaskModel на основе данных задачи.
-    - Добавляет задачу в сессию и коммитит транзакцию.
-
-    Аргументы:
-    - task: Данные задачи в формате TaskDTO.
-    """
-    await task_repository.create_task(task)
+@router.post("/", response_model=TaskSchema)
+async def create_task(
+    body: TaskCreateSchema,
+    task_service: Annotated[TaskService, Depends(get_tasks_service)],
+    user_id: int = Depends(get_request_user_id),
+):
+    task = await task_service.create_task(body, user_id)
+    return task
 
 
-@router.get("/name/{task_name}", response_model=TaskDTO)
+@router.get("/name/{task_name}", response_model=TaskSchema)
 async def get_task_by_name(
     task_name: str,
     task_repository: Annotated[TaskRepository, Depends(get_tasks_repository)],
@@ -80,7 +72,7 @@ async def get_task_by_name(
     return task
 
 
-@router.get("/id/{task_id}", response_model=TaskDTO)
+@router.get("/id/{task_id}", response_model=TaskSchema)
 async def get_task_by_id(
     task_id: int,
     task_repository: Annotated[TaskRepository, Depends(get_tasks_repository)],
@@ -103,7 +95,7 @@ async def get_task_by_id(
     return task
 
 
-@router.patch("/{task_id}", response_model=TaskDTO)
+@router.patch("/{task_id}", response_model=TaskSchema)
 async def _update_task(
     task_id: int,
     new_name: str,

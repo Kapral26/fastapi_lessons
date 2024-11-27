@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
 
-class UserLoginDTO(BaseModel):
+class UserLoginSchema(BaseModel):
     """
     Модель данных для входа пользователя.
 
@@ -27,7 +27,7 @@ class UserLoginDTO(BaseModel):
         from_attributes = True
 
 
-class UserModel(BaseModel):
+class UserSchema(BaseModel):
     """
     Модель данных для пользователя.
 
