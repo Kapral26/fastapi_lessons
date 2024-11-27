@@ -8,7 +8,18 @@ settings = Settings()
 
 
 class CategoryModel(Base):
-    """Модель категории."""
+    """
+    Модель категории.
+
+    Атрибуты:
+    id (Mapped[intpk]): Идентификатор категории.
+    name (Mapped[str]): Имя категории.
+    type (Mapped[str | None]): Тип категории.
+    tasks (Mapped[list["TaskModel"]]): Список задач, связанных с этой категорией.
+
+    Методы:
+    __init__(self, **kwargs): Инициализирует экземпляр класса.
+    """
 
     __tablename__ = "category"
 
@@ -21,7 +32,19 @@ class CategoryModel(Base):
 
 
 class TaskModel(Base):
-    """Модель задачи."""
+    """
+    Модель задачи.
+
+    Атрибуты:
+    id (Mapped[intpk]): Идентификатор задачи.
+    name (Mapped[str]): Имя задачи.
+    pomodoro_count (Mapped[int]): Количество помидоров.
+    category_id (Mapped[int]): Идентификатор категории.
+    category (Mapped[CategoryModel]): Категория, к которой относится задача.
+
+    Методы:
+    __init__(self, **kwargs): Инициализирует экземпляр класса.
+    """
 
     __tablename__ = "tasks"
 

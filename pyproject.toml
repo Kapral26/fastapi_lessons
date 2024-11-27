@@ -112,6 +112,8 @@ exclude = [
     "dist",
     "node_modules",
     "venv",
+    ".idea",
+    "migratons/verdions"
 ]
 per-file-ignores = { }
 # Игнорировать следующие файлы

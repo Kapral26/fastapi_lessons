@@ -1,10 +1,20 @@
 class UserNotFoundError(Exception):
-    """Пользователь не найден."""
+    """
+    Исключение, которое возникает, когда пользователь не найден.
+
+    Атрибуты:
+    detail (str): Сообщение об ошибке.
+    """
 
     detail = "User not found"
 
 
 class UserInvalidError(Exception):
-    """Пользователь не найден."""
+    """
+    Исключение, которое возникает, когда пароль пользователя неверный.
+
+    Атрибуты:
+    detail (str): Сообщение об ошибке.
+    """
 
     detail = "User password invalid"

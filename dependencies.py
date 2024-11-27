@@ -12,17 +12,32 @@ from settings import Settings
 
 
 def get_tasks_repository() -> TaskRepository:
-    """Create a :class:`TaskRepository` from the default async session factory.
+    """
+    Функция для получения экземпляра класса TaskRepository.
 
-    :return: a :class:`TaskRepository` instance.
+    :return: TaskRepository: Экземпляр класса TaskRepository,
+     который используется для работы с задачами в базе данных.
+
+    Примечание:
+    Эта функция используется для получения экземпляра класса TaskRepository,
+     который используется для работы с задачами в базе данных.
+    Экземпляр класса TaskRepository создается с использованием фабрики асинхронных сессий async_session_factory.
     """
     return TaskRepository(async_session_factory)
 
 
 def get_task_cache_repository() -> TaskCacheRepository:
-    """Create a :class:`CacheTaskRepository` from the default Redis connection.
+    """
+    Функция для получения экземпляра класса TaskCacheRepository.
 
-    :return: a :class:`CacheTaskRepository` instance.
+    :return: TaskCacheRepository: Экземпляр класса TaskCacheRepository,
+     который используется для работы с кэшем задач в Redis.
+
+    Примечание:
+    Эта функция используется для получения экземпляра класса TaskCacheRepository,
+     который используется для работы с кэшем задач в Redis.
+    Экземпляр класса TaskCacheRepository создается с использованием функции get_redis_connection(),
+     которая возвращает соединение с Redis.
     """
     return TaskCacheRepository(get_redis_connection())
 
@@ -33,11 +48,22 @@ def get_tasks_service(
         TaskCacheRepository, Depends(get_task_cache_repository)
     ],
 ) -> TaskService:
-    """Create a :class:`TaskService` from the default :class:`TaskRepository` and :class:`CacheTaskRepository`.
+    """
+    Функция для получения экземпляра класса TaskService.
 
-    :param task_repository: a :class:`TaskRepository` instance.
-    :param task_cache_repository: a :class:`CacheTaskRepository` instance.
-    :return: a :class:`TaskService` instance.
+    Параметры:
+    task_repository (Annotated[TaskRepository, Depends(get_tasks_repository)]): Экземпляр класса TaskRepository,
+     который используется для работы с задачами в базе данных.
+    task_cache_repository (Annotated[TaskCacheRepository, Depends(get_task_cache_repository)]):
+    Экземпляр класса TaskCacheRepository, который используется для работы с кэшем задач в Redis.
+
+    Возвращает:
+    TaskService: Экземпляр класса TaskService, который используется для работы с задачами.
+
+    Примечание:
+    Эта функция используется для получения экземпляра класса TaskService, который используется для работы с задачами.
+    Экземпляры классов TaskRepository и TaskCacheRepository передаются в качестве параметров функции
+     и используются для создания экземпляра класса TaskService.
     """
     return TaskService(
         task_repository=task_repository, task_cache_repository=task_cache_repository
@@ -45,9 +71,16 @@ def get_tasks_service(
 
 
 def get_user_repository() -> UserRepository:
-    """Create a :class:`UserRepository` from the default async session factory.
+    """
+    Функция для получения экземпляра класса UserRepository.
 
-    :return: a :class:`UserRepository` instance.
+    Возвращает:
+    UserRepository: Экземпляр класса UserRepository, который используется для работы с пользователями в базе данных.
+
+    Примечание:
+    Эта функция используется для получения экземпляра класса UserRepository,
+    который используется для работы с пользователями в базе данных.
+    Экземпляр класса UserRepository создается с использованием фабрики асинхронных сессий async_session_factory.
     """
     return UserRepository(session_factory=async_session_factory)
 
@@ -55,10 +88,21 @@ def get_user_repository() -> UserRepository:
 def get_auth_service(
     user_repository: Annotated[UserRepository, Depends(get_user_repository)],
 ) -> AuthService:
-    """Create a :class:`AuthService` from the default :class:`UserRepository` and :class:`UserService`.
+    """
+    Функция для получения экземпляра класса AuthService.
 
-    :param user_repository: a :class:`UserRepository` instance.
-    :return: a :class:`AuthService` instance.
+    Параметры:
+    user_repository (Annotated[UserRepository, Depends(get_user_repository)]): Экземпляр класса UserRepository,
+    который используется для работы с пользователями в базе данных.
+
+    Возвращает:
+    AuthService: Экземпляр класса AuthService, который используется для работы с аутентификацией пользователей.
+
+    Примечание:
+    Эта функция используется для получения экземпляра класса AuthService,
+    который используется для работы с аутентификацией пользователей.
+    Экземпляр класса UserRepository передается в качестве параметра функции и
+     используется для создания экземпляра класса AuthService.
     """
     return AuthService(user_repository=user_repository, settings=Settings())
 
@@ -67,10 +111,21 @@ def get_user_service(
     user_repository: Annotated[UserRepository, Depends(get_user_repository)],
     auth_service: Annotated[AuthService, Depends(get_auth_service)],
 ) -> UserService:
-    """Create a :class:`UserService` from the default :class:`UserRepository` and :class:`AuthService`.
+    """
+    Функция для получения экземпляра класса UserService.
 
-    :param user_repository: a :class:`UserRepository` instance.
-    :param auth_service: a :class:`AuthService` instance.
-    :return: a :class:`UserService` instance.
+    Параметры:
+    user_repository (Annotated[UserRepository, Depends(get_user_repository)]): Экземпляр класса UserRepository,
+    который используется для работы с пользователями в базе данных.
+    auth_service (Annotated[AuthService, Depends(get_auth_service)]): Экземпляр класса AuthService,
+    который используется для работы с аутентификацией пользователей.
+
+    Возвращает:
+    UserService: Экземпляр класса UserService, который используется для работы с пользователями.
+
+    Примечание:
+    Эта функция используется для получения экземпляра класса UserService,
+    который используется для работы с пользователями. Экземпляры классов UserRepository и AuthService
+    передаются в качестве параметров функции и используются для создания экземпляра класса UserService.
     """
     return UserService(user_repository=user_repository, auth_service=auth_service)

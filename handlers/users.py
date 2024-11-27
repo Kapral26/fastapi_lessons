@@ -8,9 +8,7 @@ from schemas.users import UserModel
 from service.user import UserService
 
 router = APIRouter(
-    # Префикс handler`а, чтобы ниже при регистрации к каждому не указывать  # noqa: RUF003
     prefix="/users",
-    # Теги handler`а  # noqa: RUF003
     tags=["users"],
 )
 
@@ -18,13 +16,24 @@ router = APIRouter(
 @router.post("/", response_model=UserLoginDTO)
 async def create_user(
     body: UserModel,
-    user_repository: Annotated[UserService, Depends(get_user_service)],
+    user_service: Annotated[UserService, Depends(get_user_service)],
 ) -> UserLoginDTO:
-    """Handler для создания пользователя."""  # noqa: D401
+    """
+    Создает нового пользователя.
+
+    Описание:
+    - Создает нового пользователя в базе данных.
+    - Генерирует токен доступа для нового пользователя.
+    - Возвращает данные пользователя в формате UserLoginDTO.
+
+    Аргументы:
+    - body: Данные пользователя в формате UserModel.
+
+    Возвращает:
+    - Данные пользователя в формате UserLoginDTO.
+    """
     try:
-        create_user_result = await user_repository.create_user(
-            body.username, body.password
-        )
+        create_user_result = await user_service.create_user(body.username, body.password)
     except Exception as error:
         raise HTTPException(status_code=422, detail=str(error))
 

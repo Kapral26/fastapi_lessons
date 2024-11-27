@@ -4,7 +4,17 @@ from database.database import Base, intpk
 
 
 class UserProfile(Base):
-    """Модель пользователя."""
+    """
+    Модель пользователя.
+
+    Атрибуты:
+    id (Mapped[intpk]): Идентификатор пользователя.
+    username (Mapped[str]): Имя пользователя.
+    password (Mapped[str]): Пароль пользователя.
+
+    Методы:
+    __init__(self, **kwargs): Инициализирует экземпляр класса.
+    """
 
     __tablename__ = "user_profile"
 

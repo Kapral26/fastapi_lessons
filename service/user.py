@@ -11,11 +11,38 @@ if TYPE_CHECKING:
 
 @dataclass
 class UserService:
+    """
+    Класс для работы с пользователями.
+
+    Атрибуты:
+    user_repository (UserRepository): Экземпляр класса UserRepository,
+     который используется для работы с пользователями в базе данных.
+    auth_service (AuthService): Экземпляр класса AuthService,
+     который используется для работы с аутентификацией пользователей.
+
+    Методы:
+    create_user(self, username: str, password: str) -> UserLoginDTO: Создает нового пользователя.
+    """
+
     user_repository: UserRepository
     auth_service: "AuthService"
 
     async def create_user(self, username: str, password: str) -> UserLoginDTO:
-        """Создание нового пользователя."""
+        """
+        Создает нового пользователя.
+
+        Описание:
+        - Создает нового пользователя в базе данных.
+        - Генерирует токен доступа для нового пользователя.
+        - Возвращает данные пользователя в формате UserLoginDTO.
+
+        Аргументы:
+        - username: Имя пользователя.
+        - password: Пароль пользователя.
+
+        Возвращает:
+        - Данные пользователя в формате UserLoginDTO.
+        """
         new_user: UserProfile = await self.user_repository.create_user(
             username, password
         )

@@ -6,16 +6,23 @@ from schemas.tasks import TaskDTO
 
 
 class TaskCacheRepository:
-    """A repository class for caching tasks in Redis.
+    """
+    Класс для работы с кэшем задач в Redis.
 
-    This class provides methods for getting and setting tasks in Redis.
+    Атрибуты:
+    redis (Redis): Объект подключения к Redis.
+
+    Методы:
+    get_tasks(self) -> list[TaskDTO] | None: Получает список задач из Redis.
+    set_tasks(self, tasks: list[TaskDTO]) -> None: Сохраняет список задач в Redis.
     """
 
     def __init__(self, redis_session: Redis):
         self.redis = redis_session
 
     def get_tasks(self) -> list[TaskDTO] | None:
-        """Получает список задач из Redis.
+        """
+        Получает список задач из Redis.
 
         Описание:
         - Использует Redis pipeline для выполнения нескольких команд.
@@ -40,7 +47,8 @@ class TaskCacheRepository:
             return tasks
 
     def set_tasks(self, tasks: list[TaskDTO]) -> None:
-        """Сохраняет список задач в Redis.
+        """
+        Сохраняет список задач в Redis.
 
         Описание:
         - Удаляет текущий список задач (если он существует) в ключе "tasks".

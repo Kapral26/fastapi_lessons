@@ -7,7 +7,16 @@ settings = Settings()
 
 
 def get_redis_connection() -> redis.Redis:
-    """Синхронное подключение к Redis."""
+    """
+    Функция для получения подключения к Redis.
+
+    Описание:
+    - Создает подключение к Redis с использованием настроек из файла settings.
+    - Возвращает объект подключения к Redis.
+
+    Возвращает:
+    - Объект подключения к Redis.
+    """
     redis_host = settings.redis_host
     redis_port = settings.redis_port
     redis_db = settings.redis_db

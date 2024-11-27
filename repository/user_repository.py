@@ -1,6 +1,5 @@
-from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TypeVar
+from typing import TypeVar, Callable
 
 from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,10 +11,35 @@ T = TypeVar("T")
 
 @dataclass
 class UserRepository:
+    """
+    Класс для работы с пользователями в базе данных.
+
+    Атрибуты:
+    session_factory (Callable[[T], AsyncSession]): Фабрика асинхронных сессий.
+
+    Методы:
+    create_user(self, username: str, password: str) -> UserProfile: Создает нового пользователя.
+    get_user(self, user_id: int) -> UserProfile | None: Получает пользователя по идентификатору.
+    get_user_by_name(self, username: str) -> UserProfile | None: Получает пользователя по имени.
+    """
+
     session_factory: Callable[[T], AsyncSession]
 
     async def create_user(self, username: str, password: str) -> UserProfile:
-        """Создание пользователя."""
+        """
+        Создает нового пользователя.
+
+        Описание:
+        - Создает новую запись в базе данных с указанными именем и паролем.
+        - Возвращает созданного пользователя.
+
+        Аргументы:
+        - username: Имя пользователя.
+        - password: Пароль пользователя.
+
+        Возвращает:
+        - Созданного пользователя.
+        """
         stmnt = (
             insert(UserProfile)
             .values(username=username, password=password)
@@ -31,7 +55,19 @@ class UserRepository:
         return new_user
 
     async def get_user(self, user_id: int) -> UserProfile | None:
-        """Получение пользователя."""
+        """
+        Получает пользователя по идентификатору.
+
+        Описание:
+        - Выполняет запрос на выборку пользователя по идентификатору.
+        - Возвращает первого найденного пользователя или None, если пользователь не найден.
+
+        Аргументы:
+        - user_id: Идентификатор пользователя.
+
+        Возвращает:
+        - Найденного пользователя или None, если пользователь не найден.
+        """
         query = select(UserProfile).where(UserProfile.id == user_id)
         async with self.session_factory() as session:
             query_result = await session.execute(query)
@@ -39,7 +75,19 @@ class UserRepository:
             return user
 
     async def get_user_by_name(self, username: str) -> UserProfile | None:
-        """Авторизация пользователя."""
+        """
+        Получает пользователя по имени.
+
+        Описание:
+        - Выполняет запрос на выборку пользователя по имени.
+        - Возвращает первого найденного пользователя или None, если пользователь не найден.
+
+        Аргументы:
+        - username: Имя пользователя.
+
+        Возвращает:
+        - Найденного пользователя или None, если пользователь не найден.
+        """
         query = select(UserProfile).where(UserProfile.username == username)
         async with self.session_factory() as session:
             # Сбрасываем кэш SQLAlchemy

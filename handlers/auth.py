@@ -9,9 +9,7 @@ from schemas.users import UserModel
 from service.auth import AuthService
 
 router = APIRouter(
-    # Префикс handlers, чтобы ниже при регистрации к каждому не указывать
     prefix="/auth",
-    # Теги handlers
     tags=["auth"],
 )
 
@@ -21,7 +19,21 @@ async def auth_user(
     body: UserModel,
     user_repository: Annotated[AuthService, Depends(get_auth_service)],
 ) -> UserLoginDTO:
-    """Handler для авторизации пользователя."""
+    """
+    Аутентифицирует пользователя.
+
+    Описание:
+    - Пытается выполнить вход пользователя с указанными данными.
+    - Если пользователь не найден, генерирует исключение UserNotFoundError.
+    - Если пароль неверный, генерирует исключение UserInvalidError.
+    - Возвращает данные пользователя в формате UserLoginDTO.
+
+    Аргументы:
+    - body: Данные пользователя в формате UserModel.
+
+    Возвращает:
+    - Данные пользователя в формате UserLoginDTO.
+    """
     try:
         user_login_result = await user_repository.user_login(
             body.username, body.password

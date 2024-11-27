@@ -12,25 +12,53 @@ T = TypeVar("T")
 
 
 class TaskRepository:
-    def __init__(self, session_factory: Callable[[T], AsyncSession]):
-        """Initialize a TaskRepository.
+    """
+    Класс для работы с задачами в базе данных.
 
-        :param session_factory: a callable that returns an instance of
-            :class:`sqlalchemy.ext.asyncio.AsyncSession`.
-        """
+    Атрибуты:
+    session_factory (Callable[[T], AsyncSession]): Фабрика асинхронных сессий.
+
+    Методы:
+    create_task(self, task_data: TaskDTO) -> None: Создает новую задачу.
+    get_tasks(self) -> Sequence[TaskModel]: Получает список всех задач.
+    update_task_name(self, task_id: int, new_name: str) -> type[TaskModel] | None: Обновляет имя задачи.
+    get_task_by_name(self, name: str) -> TaskModel | None: Получает задачу по имени.
+    get_task_by_id(self, task_id: int) -> TaskModel | None: Получает задачу по идентификатору.
+    delete_task(self, task_id: int) -> None: Удаляет задачу.
+    get_task_by_category_id(self, category_id: int) -> Sequence[TaskModel]: Получает задачи по идентификатору категории.
+    get_task_by_category_name(self, category_name: str) -> Sequence[TaskModel]: Получает задачи по имени категории.
+    insert_fake_data(self, num_tasks: int = 20) -> None: Вставляет фиктивные данные в базу данных.
+    """
+
+    def __init__(self, session_factory: Callable[[T], AsyncSession]):
         self.session_factory = session_factory
 
     async def create_task(self, task_data: TaskDTO) -> None:
-        """Создание задачи."""
+        """
+        Создает новую задачу.
+
+        Описание:
+        - Создает экземпляр модели TaskModel на основе данных задачи.
+        - Добавляет задачу в сессию и коммитит транзакцию.
+
+        Аргументы:
+        - task_data: Данные задачи в формате TaskDTO.
+        """
         task_model = TaskModel(**task_data.dict())
         async with self.session_factory() as session:
             session.add(task_model)
             await session.commit()
 
     async def get_tasks(self) -> Sequence[TaskModel]:
-        """Get all tasks.
+        """
+        Получает список всех задач.
 
-        :return: a list of :class:`TaskModel` objects
+        Описание:
+        - Выполняет запрос на выборку всех задач из базы данных.
+        - Возвращает список моделей TaskModel.
+
+        Возвращает:
+        - Список моделей TaskModel.
         """
         async with self.session_factory() as session:
             query_result = await session.execute(select(TaskModel))
@@ -40,7 +68,21 @@ class TaskRepository:
     async def update_task_name(
         self, task_id: int, new_name: str
     ) -> type[TaskModel] | None:
-        """Обновление задачи."""
+        """
+        Обновляет имя задачи.
+
+        Описание:
+        - Обновляет имя задачи в базе данных.
+        - Возвращает обновленную задачу.
+
+        Аргументы:
+        - task_id: Идентификатор задачи.
+        - new_name: Новое имя задачи.
+
+        Возвращает:
+        - Обновленную задачу в формате TaskModel, если задача найдена.
+        - None, если задача не найдена.
+        """
         async with self.session_factory() as session:
             query = (
                 update(TaskModel).values(name=new_name).where(TaskModel.id == task_id)
@@ -51,7 +93,20 @@ class TaskRepository:
             return task
 
     async def get_task_by_name(self, name: str) -> TaskModel | None:
-        """Получение задачи по имени."""
+        """
+        Получение задачи по имени.
+
+        Описание:
+        - Выполняет запрос на выборку задачи по имени.
+        - Возвращает первую найденную задачу или None, если задача не найдена.
+
+        Аргументы:
+        - name: Имя задачи.
+
+        Возвращает:
+        - Модель TaskModel, если задача найдена.
+        - None, если задача не найдена.
+        """
         async with self.session_factory() as session:
             query_result = await session.execute(
                 select(TaskModel).where(TaskModel.name == name)
@@ -62,11 +117,19 @@ class TaskRepository:
         return task
 
     async def get_task_by_id(self, task_id: int) -> TaskModel | None:
-        """Get a task by its ID.
+        """
+        Получение задачи по идентификатору.
 
-        :param task_id: the ID of the task to be retrieved
-        :return: a :class:`TaskModel` object, or None if no task with the given
-            ID exists
+        Описание:
+        - Выполняет запрос на выборку задачи по идентификатору.
+        - Возвращает первую найденную задачу или None, если задача не найдена.
+
+        Аргументы:
+        - task_id: Идентификатор задачи.
+
+        Возвращает:
+        - Модель TaskModel, если задача найдена.
+        - None, если задача не найдена.
         """
         async with self.session_factory() as session:
             query_result = await session.execute(
@@ -76,18 +139,32 @@ class TaskRepository:
         return task
 
     async def delete_task(self, task_id: int) -> None:
-        """Удаление задачи."""
+        """
+        Удаление задачи.
+
+        Описание:
+        - Удаляет задачу из базы данных.
+
+        Аргументы:
+        - task_id: Идентификатор задачи.
+        """
         async with self.session_factory() as session:
             await session.execute(delete(TaskModel).where(TaskModel.id == task_id))
             await session.commit()
 
     async def get_task_by_category_id(self, category_id: int) -> Sequence[TaskModel]:
-        """Get a task by its category ID.
+        """
+        Получение задач по идентификатору категории.
 
-        :param category_id: the ID of the category to be searched
-        :return: a :class:`TaskModel` object, or a list of :class:`TaskModel` objects
-            if there are multiple tasks with the same category ID, or None if no
-            task with the given category ID exists
+        Описание:
+        - Выполняет запрос на выборку задач по идентификатору категории.
+        - Возвращает список моделей TaskModel.
+
+        Аргументы:
+        - category_id: Идентификатор категории.
+
+        Возвращает:
+        - Список моделей TaskModel.
         """
         async with self.session_factory() as session:
             query_result = await session.execute(
@@ -101,12 +178,18 @@ class TaskRepository:
     async def get_task_by_category_name(
         self, category_name: str
     ) -> Sequence[TaskModel]:
-        """Get a task by its category name.
+        """
+        Получение задач по имени категории.
 
-        :param category_name: the name of the category to be searched
-        :return: a :class:`TaskModel` object, or a list of :class:`TaskModel` objects
-            if there are multiple tasks with the same category name, or None if no
-            task with the given category name exists
+        Описание:
+        - Выполняет запрос на выборку задач по имени категории.
+        - Возвращает список моделей TaskModel.
+
+        Аргументы:
+        - category_name: Имя категории.
+
+        Возвращает:
+        - Список моделей TaskModel.
         """
         async with self.session_factory() as session:
             query = (
@@ -119,7 +202,17 @@ class TaskRepository:
         return tasks
 
     async def insert_fake_data(self, num_tasks: int = 20) -> None:
-        """Insert fake data into the tables."""
+        """
+        Вставляет фиктивные данные в базу данных.
+
+        Описание:
+        - Удаляет все задачи и категории из базы данных.
+        - Создает фиктивные категории и задачи.
+        - Добавляет задачи в базу данных.
+
+        Аргументы:
+        - num_tasks: Количество фиктивных задач для вставки (по умолчанию 20).
+        """
         fake = Faker()
         async with self.session_factory() as session:
             await session.execute(delete(TaskModel))

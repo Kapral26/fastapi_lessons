@@ -25,12 +25,15 @@ router = APIRouter(
 async def get_async_tasks(
     task_service: Annotated[TaskService, Depends(get_tasks_service)],
 ) -> list[TaskDTO] | None:
-    """Get all tasks from the database.
+    """
+    Получение всех задач.
 
-    This endpoint returns a list of TaskDTO objects, which contains all the tasks in the database.
-    The list will be empty if there are no tasks.
+    Описание:
+    - Выполняет запрос на выборку всех задач из базы данных.
+    - Возвращает список моделей TaskModel.
 
-    The endpoint is designed to be used with the TaskService, which encapsulates the logic of getting all tasks from the database.
+    Возвращает:
+    - Список моделей TaskModel.
     """
     all_tasks = await task_service.get_tasks()
     return all_tasks
@@ -41,8 +44,15 @@ async def _create_task(
     task: TaskDTO,
     task_repository: Annotated[TaskRepository, Depends(get_tasks_repository)],
 ) -> None:
-    """Можно обратить внимание, что не указан как /create_task
-    Так, как это POST запрос, оно является явным указанием.
+    """
+    Создание новой задачи.
+
+    Описание:
+    - Создает экземпляр модели TaskModel на основе данных задачи.
+    - Добавляет задачу в сессию и коммитит транзакцию.
+
+    Аргументы:
+    - task: Данные задачи в формате TaskDTO.
     """
     await task_repository.create_task(task)
 
@@ -52,7 +62,20 @@ async def get_task_by_name(
     task_name: str,
     task_repository: Annotated[TaskRepository, Depends(get_tasks_repository)],
 ) -> TaskModel | None:
-    """Получение задачи по имени."""
+    """
+    Получение задачи по имени.
+
+    Описание:
+    - Выполняет запрос на выборку задачи по имени.
+    - Возвращает первую найденную задачу или None, если задача не найдена.
+
+    Аргументы:
+    - task_name: Имя задачи.
+
+    Возвращает:
+    - Модель TaskModel, если задача найдена.
+    - None, если задача не найдена.
+    """
     task = await task_repository.get_task_by_name(task_name)
     return task
 
@@ -62,7 +85,20 @@ async def get_task_by_id(
     task_id: int,
     task_repository: Annotated[TaskRepository, Depends(get_tasks_repository)],
 ) -> TaskModel | None:
-    """Получение задачи по имени."""
+    """
+    Получение задачи по идентификатору.
+
+    Описание:
+    - Выполняет запрос на выборку задачи по идентификатору.
+    - Возвращает первую найденную задачу или None, если задача не найдена.
+
+    Аргументы:
+    - task_id: Идентификатор задачи.
+
+    Возвращает:
+    - Модель TaskModel, если задача найдена.
+    - None, если задача не найдена.
+    """
     task = await task_repository.get_task_by_id(task_id)
     return task
 
@@ -73,7 +109,21 @@ async def _update_task(
     new_name: str,
     task_repository: Annotated[TaskRepository, Depends(get_tasks_repository)],
 ) -> TaskModel | None:
-    """Обновление имени задачи по id."""
+    """
+    Обновление имени задачи.
+
+    Описание:
+    - Обновляет имя задачи в базе данных.
+    - Возвращает обновленную задачу.
+
+    Аргументы:
+    - task_id: Идентификатор задачи.
+    - new_name: Новое имя задачи.
+
+    Возвращает:
+    - Обновленную задачу в формате TaskModel, если задача найдена.
+    - None, если задача не найдена.
+    """
     updt_task = await task_repository.update_task_name(task_id, new_name)
     return updt_task
 
@@ -83,5 +133,13 @@ async def _delete_task(
     task_id: int,
     task_repository: Annotated[TaskRepository, Depends(get_tasks_repository)],
 ) -> None:
-    """Удаление задачи по id."""
+    """
+    Удаление задачи.
+
+    Описание:
+    - Удаляет задачу из базы данных.
+
+    Аргументы:
+    - task_id: Идентификатор задачи.
+    """
     await task_repository.delete_task(task_id)

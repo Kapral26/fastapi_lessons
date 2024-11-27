@@ -1,3 +1,11 @@
+"""
+Этот файл содержит настройки приложения.
+Содержимое:
+- Определяет конфигурационные параметры, такие как настройки базы данных, параметры кэширования,
+секретные ключи и другие переменные окружения.
+- Может использоваться для загрузки переменных окружения из `.env` файлов и предоставления их в виде удобных атрибутов.
+"""
+
 from pathlib import Path
 
 from pydantic import Field, SecretStr
@@ -33,12 +41,16 @@ class Settings(BaseSettings):
     @property
     def database_dsn(self) -> str:
         """Возвращает объект URL для подключения к PostgreSQL с использованием sqlalchemy и драйвера psycopg2."""
-        return f"postgresql+psycopg://{self.postgres_user}:{self.postgres_password.get_secret_value()}@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
+        return (f"postgresql+psycopg://{self.postgres_user}:"
+                f"{self.postgres_password.get_secret_value()}@"
+                f"{self.postgres_host}:{self.postgres_port}/{self.postgres_db}")
 
     @property
     def async_database_dsn(self) -> str:
         """Возвращает объект URL для подключения к PostgreSQL с использованием sqlalchemy и драйвера psycopg2."""
-        return f"postgresql+asyncpg://{self.postgres_user}:{self.postgres_password.get_secret_value()}@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
+        return (f"postgresql+asyncpg://{self.postgres_user}:"
+                f"{self.postgres_password.get_secret_value()}@"
+                f"{self.postgres_host}:{self.postgres_port}/{self.postgres_db}")
 
     # Начиная со второй версии pydantic, настройки класса настроек задаются
     # через model_config
