@@ -1,6 +1,5 @@
-import datetime as dt
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 from jose import jwt, JWTError
@@ -35,7 +34,11 @@ class AuthService:
     user_repository: "UserRepository"
     settings: Settings
 
-    async def user_login(self, username: str, password: str) -> UserLoginSchema | None:
+    async def user_login(
+            self,
+            username: str,
+            password: str
+    ) -> UserLoginSchema | None:
         """
         Пытается выполнить вход пользователя с указанными данными.
 
@@ -62,7 +65,10 @@ class AuthService:
         return UserLoginSchema.model_validate(user)
 
     @staticmethod
-    async def _validate_user(user: UserProfile, password: str) -> None:
+    async def _validate_user(
+            user: UserProfile,
+            password: str
+    ) -> None:
         """
         Проверяет, что пользователь существует и пароль верный.
 
@@ -85,7 +91,10 @@ class AuthService:
         if user.password != password:
             raise UserInvalidError
 
-    def generate_access_token(self, user_id: int) -> str:
+    def generate_access_token(
+            self,
+            user_id: int
+    ) -> str:
         """
         Генерирует токен доступа для пользователя.
 
@@ -99,22 +108,27 @@ class AuthService:
         - Токен доступа для пользователя.
         """
         # Время жизни токена
-        expires_date_unix = (dt.datetime.utcnow() + timedelta(days=7)).timestamp()
 
         token = jwt.encode(
-            {"user_id": user_id, "expire": expires_date_unix},
-            self.settings.jwt_secret_key.get_secret_value(),  # ключ шифрования.
-            algorithm=self.settings.jwt_algorithm,  # Алгоритм шифрования.
+                {
+                    "user_id": user_id,
+                    "exp": self.settings.jwt_expires
+                },
+                self.settings.jwt_secret_key.get_secret_value(),  # ключ шифрования.
+                algorithm=self.settings.jwt_algorithm,  # Алгоритм шифрования.
         )
 
         return token
 
-    def get_user_id_from_access_token(self, access_token: str) -> int | None:
+    def get_user_id_from_access_token(
+            self,
+            access_token: str
+    ) -> int | None:
         try:
             payload = jwt.decode(
-                access_token,
-                self.settings.jwt_secret_key.get_secret_value(),
-                algorithms=[self.settings.jwt_algorithm],
+                    access_token,
+                    self.settings.jwt_secret_key.get_secret_value(),
+                    algorithms=[self.settings.jwt_algorithm],
             )
         except JWTError:
             raise TokenIsNotCorrectError
