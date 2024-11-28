@@ -47,4 +47,4 @@ class UserService:
             username, password
         )
         access_token = self.auth_service.generate_access_token(new_user.id)
-        return UserLoginSchema(user_id=new_user.id, access_token=access_token)
+        return UserLoginSchema(id=new_user.id, access_token=access_token)

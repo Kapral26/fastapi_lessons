@@ -2,28 +2,28 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
-from starlette.status import HTTP_204_NO_CONTENT
+from fastapi import APIRouter, Depends, HTTPException
+from starlette.status import HTTP_204_NO_CONTENT, HTTP_404_NOT_FOUND
 
-from dependencies import get_tasks_repository, get_tasks_service, get_request_user_id
+from dependencies import get_tasks_service, get_request_user_id
+from exceptions import TaskNotFoundError
 from models import TaskModel
-from repository import TaskRepository
 from schemas.tasks import TaskSchema, TaskCreateSchema
 from service.task_service import TaskService
 
 # APIRouter - Дает возможность регистрировать роуты
 
 router = APIRouter(
-    # Префикс handler`а, чтобы ниже при регистрации к каждому не указывать
-    prefix="/tasks",
-    # Теги handler`а
-    tags=["tasks"],
+        # Префикс handler`а, чтобы ниже при регистрации к каждому не указывать
+        prefix="/tasks",
+        # Теги handler`а
+        tags=["tasks"],
 )
 
 
 @router.get("/all", response_model=list[TaskSchema])
-async def get_async_tasks(
-    task_service: Annotated[TaskService, Depends(get_tasks_service)],
+async def get_tasks(
+        task_service: Annotated[TaskService, Depends(get_tasks_service)],
 ) -> list[TaskSchema] | None:
     """
     Получение всех задач.
@@ -41,19 +41,19 @@ async def get_async_tasks(
 
 @router.post("/", response_model=TaskSchema)
 async def create_task(
-    body: TaskCreateSchema,
-    task_service: Annotated[TaskService, Depends(get_tasks_service)],
-    user_id: int = Depends(get_request_user_id),
-):
+        body: TaskCreateSchema,
+        task_service: Annotated[TaskService, Depends(get_tasks_service)],
+        user_id: int = Depends(get_request_user_id),
+) -> TaskSchema:
     task = await task_service.create_task(body, user_id)
     return task
 
 
 @router.get("/name/{task_name}", response_model=TaskSchema)
 async def get_task_by_name(
-    task_name: str,
-    task_repository: Annotated[TaskRepository, Depends(get_tasks_repository)],
-) -> TaskModel | None:
+        task_name: str,
+        task_service: Annotated[TaskService, Depends(get_tasks_service)],
+) -> TaskModel:
     """
     Получение задачи по имени.
 
@@ -68,15 +68,18 @@ async def get_task_by_name(
     - Модель TaskModel, если задача найдена.
     - None, если задача не найдена.
     """
-    task = await task_repository.get_task_by_name(task_name)
+    try:
+        task = await task_service.get_task_by_name(task_name)
+    except TaskNotFoundError as error:
+        raise HTTPException(HTTP_404_NOT_FOUND, detail=error.detail)
     return task
 
 
 @router.get("/id/{task_id}", response_model=TaskSchema)
 async def get_task_by_id(
-    task_id: int,
-    task_repository: Annotated[TaskRepository, Depends(get_tasks_repository)],
-) -> TaskModel | None:
+        task_id: int,
+        task_service: Annotated[TaskService, Depends(get_tasks_service)],
+) -> TaskModel:
     """
     Получение задачи по идентификатору.
 
@@ -91,16 +94,45 @@ async def get_task_by_id(
     - Модель TaskModel, если задача найдена.
     - None, если задача не найдена.
     """
-    task = await task_repository.get_task_by_id(task_id)
+    try:
+        task = await task_service.get_task_by_id(task_id)
+    except TaskNotFoundError as error:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=error.detail)
+    return task
+
+
+@router.get("/id/{task_id}", response_model=TaskSchema)
+async def get_task_by_current_user(
+        task_id: int,
+        task_service: Annotated[TaskService, Depends(get_tasks_service)],
+        user_id: int = Depends(get_request_user_id)
+) -> TaskModel:
+    try:
+        task = await task_service.get_task_by_user(user_id, task_id)
+    except TaskNotFoundError as error:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=error.detail)
+    return task
+
+
+@router.get("/id/{user_id}", response_model=TaskSchema)
+async def get_user_tasks(
+        task_service: Annotated[TaskService, Depends(get_tasks_service)],
+        user_id: int
+) -> TaskModel:
+    try:
+        task = await task_service.get_user_tasks(user_id)
+    except TaskNotFoundError as error:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=error.detail)
     return task
 
 
 @router.patch("/{task_id}", response_model=TaskSchema)
-async def _update_task(
-    task_id: int,
-    new_name: str,
-    task_repository: Annotated[TaskRepository, Depends(get_tasks_repository)],
-) -> TaskModel | None:
+async def _update_task_name(
+        task_id: int,
+        new_name: str,
+        task_service: Annotated[TaskService, Depends(get_tasks_service)],
+        user_id: int = Depends(get_request_user_id),
+) -> TaskSchema:
     """
     Обновление имени задачи.
 
@@ -116,14 +148,18 @@ async def _update_task(
     - Обновленную задачу в формате TaskModel, если задача найдена.
     - None, если задача не найдена.
     """
-    updt_task = await task_repository.update_task_name(task_id, new_name)
+    try:
+        updt_task = await task_service.update_task_name(task_id, new_name, user_id)
+    except TaskNotFoundError as error:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=error.detail)
     return updt_task
 
 
 @router.delete("/{task_id}", status_code=HTTP_204_NO_CONTENT)
 async def _delete_task(
-    task_id: int,
-    task_repository: Annotated[TaskRepository, Depends(get_tasks_repository)],
+        task_id: int,
+        task_service: Annotated[TaskService, Depends(get_tasks_service)],
+        user_id: int = Depends(get_request_user_id),
 ) -> None:
     """
     Удаление задачи.
@@ -134,4 +170,7 @@ async def _delete_task(
     Аргументы:
     - task_id: Идентификатор задачи.
     """
-    await task_repository.delete_task(task_id)
+    try:
+        await task_service.delete_task(task_id, user_id)
+    except TaskNotFoundError as error:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=error.detail)

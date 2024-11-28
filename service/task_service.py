@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from exceptions import TaskNotFoundError
 from repository.task_cache_repository import TaskCacheRepository
 from repository.task_repository import TaskRepository
 from schemas.tasks import TaskSchema, TaskCreateSchema
@@ -23,7 +24,9 @@ class TaskService:
     task_repository: TaskRepository
     task_cache_repository: TaskCacheRepository
 
-    async def get_tasks(self) -> list[TaskSchema] | None:
+    async def get_tasks(
+            self
+    ) -> list[TaskSchema] | None:
         """
         Получает список задач.
 
@@ -45,8 +48,73 @@ class TaskService:
 
         return all_tasks
 
-    async def create_task(self, body: TaskCreateSchema, user_id: int) -> TaskSchema:
+    async def create_task(
+            self,
+            body: TaskCreateSchema,
+            user_id: int
+    ) -> TaskSchema:
         task_id = await self.task_repository.create_task(body, user_id)
-        print(task_id)
         task = await self.task_repository.get_task_by_id(task_id)
         return TaskSchema.model_validate(task)
+
+    async def update_task_name(
+            self,
+            task_id: int,
+            name: str,
+            user_id: int
+    ) -> TaskSchema:
+        updated_task = await self.task_repository.update_task_name(task_id, name, user_id)
+        if not updated_task:
+            raise TaskNotFoundError
+        return TaskSchema.model_validate(updated_task)
+
+    async def delete_task(
+            self,
+            task_id: int,
+            user_id: int
+    ):
+        updated_task = await self.task_repository.delete_task(task_id)
+        self.task_cache_repository.delete_task(task_id)
+        if not updated_task:
+            raise TaskNotFoundError
+
+    async def get_task_by_id(
+            self,
+            task_id: int
+    ) -> TaskSchema:
+        task = await self.task_repository.get_task_by_id(task_id)
+        if not task:
+            raise TaskNotFoundError
+        return TaskSchema.model_validate(task)
+
+    async def get_task_by_name(
+            self,
+            name: str
+    ) -> TaskSchema:
+        task = await self.task_repository.get_task_by_name(name)
+        if not task:
+            raise TaskNotFoundError
+        return TaskSchema.model_validate(task)
+
+    async def get_task_by_user(
+            self,
+            user_id: int,
+            task_id: int
+    ):
+        task = await self.task_repository.get_task_by_user(user_id, task_id)
+        if not task:
+            raise TaskNotFoundError
+        return TaskSchema.model_validate(task)
+
+    async def get_user_tasks(
+            self,
+            user_id: int
+    ):
+        if user_tasks := self.task_cache_repository.get_user_tasks():
+            pass
+        else:
+            user_tasks = await self.task_repository.get_user_tasks(user_id)
+            tasks_schema = [TaskSchema.model_validate(task) for task in user_tasks]
+            self.task_cache_repository.set_user_tasks(tasks_schema)
+
+        return user_tasks
