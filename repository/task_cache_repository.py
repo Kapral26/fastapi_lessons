@@ -1,6 +1,6 @@
 import json
 
-from redis import Redis
+from redis import asyncio as Redis  # noqa: N812
 
 from schemas.tasks import TaskSchema
 
@@ -23,7 +23,7 @@ class TaskCacheRepository:
     ):
         self.redis = redis_session
 
-    def get_tasks(
+    async def get_tasks(
             self
     ) -> list[TaskSchema] | None:
         """
@@ -41,12 +41,12 @@ class TaskCacheRepository:
         if not self.redis.exists("tasks"):
             return None
 
-        with self.redis.pipeline() as pipe:
+        async with self.redis.pipeline() as pipe:
             # Получить список задач из Redis
 
-            pipe.lrange("tasks", 0, -1)
+            await pipe.lrange("tasks", 0, -1)
             # Выполнить команды в pipeline
-            response = pipe.execute()
+            response = await pipe.execute()
             # pipe.execute возвращает байтовое представление объектов,
             # поэтому нужно преобразовать в строки, потом уже в json и только после этого в Модель
             tasks = [
@@ -55,7 +55,7 @@ class TaskCacheRepository:
             ]
             return tasks
 
-    def set_tasks(
+    async def set_tasks(
             self,
             tasks: list[TaskSchema]
     ) -> None:
@@ -72,44 +72,45 @@ class TaskCacheRepository:
         """
         # Сериализовать задачи в JSON для хранения в Redis
         tasks_json = [x.json() for x in tasks]
-        with self.redis.pipeline() as pipe:
+        async with self.redis.pipeline() as pipe:
             # Удалить старые задачи, если они существуют
-            pipe.delete("tasks")
+            await pipe.delete("tasks")
             # Добавить новый список задач в Redis (в виде JSON-строк)
-            pipe.lpush("tasks", *tasks_json)
+            await pipe.lpush("tasks", *tasks_json)
             # Указываю время жизни
-            pipe.expire("tasks", 60)
+            await pipe.expire("tasks", 60)
             # Выполнить команды в pipeline
-            pipe.execute()
+            await pipe.execute()
 
-    def delete_task(
+    async def delete_task(
             self,
             task_id: int
     ):
-        tasks = self.get_tasks()
+        tasks = await self.get_tasks()
         if tasks:
             new_tasks = [task for task in tasks if task.id != task_id]
             if new_tasks:
-                with self.redis.pipeline() as pipe:
+                async with self.redis.pipeline() as pipe:
                     # Добавить новый список задач в Redis (в виде JSON-строк)
-                    pipe.lpush("tasks", *new_tasks)
+                    await pipe.lpush("tasks", *new_tasks)
                     # Указываю время жизни
-                    pipe.expire("tasks", 60)
+                    await pipe.expire("tasks", 60)
                     # Выполнить команды в pipeline
-                    pipe.execute()
+                    await pipe.execute()
 
-    def get_user_tasks(
-            self
+    async def get_user_tasks(
+            self,
+            user_id: int
     ):
-        if not self.redis.exists("user_tasks"):
+        if not self.redis.exists(user_id):
             return None
 
-        with self.redis.pipeline() as pipe:
+        async with self.redis.pipeline() as pipe:
             # Получить список задач из Redis
 
-            pipe.lrange("user_tasks", 0, -1)
+            await pipe.lrange(user_id, 0, -1)
             # Выполнить команды в pipeline
-            response = pipe.execute()
+            response = await pipe.execute()
             # pipe.execute возвращает байтовое представление объектов,
             # поэтому нужно преобразовать в строки, потом уже в json и только после этого в Модель
             tasks = [
@@ -118,8 +119,9 @@ class TaskCacheRepository:
             ]
             return tasks
 
-    def set_user_tasks(
+    async def set_user_tasks(
             self,
+            user_id: int,
             tasks: list[TaskSchema]
     ) -> None:
         """
@@ -135,12 +137,12 @@ class TaskCacheRepository:
         """
         # Сериализовать задачи в JSON для хранения в Redis
         tasks_json = [x.json() for x in tasks]
-        with self.redis.pipeline() as pipe:
+        async with self.redis.pipeline() as pipe:
             # Удалить старые задачи, если они существуют
-            pipe.delete("user_tasks")
+            await pipe.delete(user_id)
             # Добавить новый список задач в Redis (в виде JSON-строк)
-            pipe.lpush("user_tasks", *tasks_json)
+            await pipe.lpush(user_id, *tasks_json)
             # Указываю время жизни
-            pipe.expire("user_tasks", 60)
+            await pipe.expire(user_id, 60)
             # Выполнить команды в pipeline
-            pipe.execute()
+            await pipe.execute()

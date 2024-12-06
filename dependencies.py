@@ -13,7 +13,7 @@ from service.user_service import UserService
 from settings import Settings
 
 
-def get_tasks_repository() -> TaskRepository:
+async def get_tasks_repository() -> TaskRepository:
     """
     Функция для получения экземпляра класса TaskRepository.
 
@@ -28,7 +28,7 @@ def get_tasks_repository() -> TaskRepository:
     return TaskRepository(async_session_factory)
 
 
-def get_task_cache_repository() -> TaskCacheRepository:
+async def get_task_cache_repository() -> TaskCacheRepository:
     """
     Функция для получения экземпляра класса TaskCacheRepository.
 
@@ -44,11 +44,11 @@ def get_task_cache_repository() -> TaskCacheRepository:
     return TaskCacheRepository(get_redis_connection())
 
 
-def get_tasks_service(
-    task_repository: Annotated[TaskRepository, Depends(get_tasks_repository)],
-    task_cache_repository: Annotated[
-        TaskCacheRepository, Depends(get_task_cache_repository)
-    ],
+async def get_tasks_service(
+        task_repository: Annotated[TaskRepository, Depends(get_tasks_repository)],
+        task_cache_repository: Annotated[
+            TaskCacheRepository, Depends(get_task_cache_repository)
+        ],
 ) -> TaskService:
     """
     Функция для получения экземпляра класса TaskService.
@@ -68,11 +68,11 @@ def get_tasks_service(
      и используются для создания экземпляра класса TaskService.
     """
     return TaskService(
-        task_repository=task_repository, task_cache_repository=task_cache_repository
+            task_repository=task_repository, task_cache_repository=task_cache_repository
     )
 
 
-def get_user_repository() -> UserRepository:
+async def get_user_repository() -> UserRepository:
     """
     Функция для получения экземпляра класса UserRepository.
 
@@ -87,8 +87,8 @@ def get_user_repository() -> UserRepository:
     return UserRepository(session_factory=async_session_factory)
 
 
-def get_auth_service(
-    user_repository: Annotated[UserRepository, Depends(get_user_repository)],
+async def get_auth_service(
+        user_repository: Annotated[UserRepository, Depends(get_user_repository)],
 ) -> AuthService:
     """
     Функция для получения экземпляра класса AuthService.
@@ -109,9 +109,9 @@ def get_auth_service(
     return AuthService(user_repository=user_repository, settings=Settings())
 
 
-def get_user_service(
-    user_repository: Annotated[UserRepository, Depends(get_user_repository)],
-    auth_service: Annotated[AuthService, Depends(get_auth_service)],
+async def get_user_service(
+        user_repository: Annotated[UserRepository, Depends(get_user_repository)],
+        auth_service: Annotated[AuthService, Depends(get_auth_service)],
 ) -> UserService:
     """
     Функция для получения экземпляра класса UserService.
@@ -137,11 +137,11 @@ reusable_oauth2 = security.HTTPBearer()
 
 
 async def get_request_user_id(
-    auth_service: Annotated[AuthService, Depends(get_auth_service)],
-    token: security.http.HTTPAuthorizationCredentials = Security(reusable_oauth2),  # noqa: B008
+        auth_service: Annotated[AuthService, Depends(get_auth_service)],
+        token: security.http.HTTPAuthorizationCredentials = Security(reusable_oauth2),  # noqa: B008
 ) -> int:
     try:
-        user_id = auth_service.get_user_id_from_access_token(token.credentials)
+        user_id = await auth_service.get_user_id_from_access_token(token.credentials)
     except TokenIsNotCorrectError as error:
         # Обычно HTTPException вызывается на уровне handlers,
         # но т.к. данный метод по Depends вызывается только там, в таком случае допускается.
@@ -149,4 +149,3 @@ async def get_request_user_id(
     except TokenExpiredError as error:
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail=error.detail)
     return user_id
-

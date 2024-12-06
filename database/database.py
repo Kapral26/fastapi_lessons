@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Annotated
 
 from sqlalchemy import create_engine
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.orm import sessionmaker, DeclarativeBase, Mapped, mapped_column
 
 from settings import Settings
@@ -12,38 +12,39 @@ from settings import Settings
 settings = Settings()
 
 sync_engine = create_engine(
-    url=settings.database_dsn,  # dsn-url
-    echo=settings.debug,  # Echo отвечает, будут ли запросы выводиться в консоль
-    pool_size=5,  # Количество соединений
-    max_overflow=10,  # На сколько больше соединений можно открывать
+        url=settings.database_dsn,  # dsn-url
+        echo=settings.debug,  # Echo отвечает, будут ли запросы выводиться в консоль
+        pool_size=5,  # Количество соединений
+        max_overflow=10,  # На сколько больше соединений можно открывать
 )
 
 async_engine = create_async_engine(
-    url=settings.async_database_dsn,  # dsn-url
-    echo=settings.debug,  # Echo отвечает, будут ли запросы выводиться в консоль
-    pool_size=5,  # Количество соединений
-    max_overflow=10,  # На сколько больше соединений можно открывать
+        url=settings.async_database_dsn,  # dsn-url
+        echo=settings.debug,  # Echo отвечает, будут ли запросы выводиться в консоль
+        pool_size=5,  # Количество соединений
+        max_overflow=10,  # На сколько больше соединений можно открывать
 )
 
 session_factory = sessionmaker(sync_engine)
 async_session_factory = async_sessionmaker(async_engine)
 
+
 # Если указать в Mapped данный тип поля, то оно будет являться первичным ключом
 created_at = Annotated[
     datetime,  # Тип данных datetime
     mapped_column(
-        # При добавлении записи в таблицу, автоматически устанавливается текущее время
-        default=datetime.now
-        # server_default - Указывает, что будет использована СУБД для функции TIMEZONE
-        # Параметр default устанавливает значение по умолчанию, но на уровне python.
+            # При добавлении записи в таблицу, автоматически устанавливается текущее время
+            default=datetime.now
+            # server_default - Указывает, что будет использована СУБД для функции TIMEZONE
+            # Параметр default устанавливает значение по умолчанию, но на уровне python.
     ),
 ]
 updated_at = Annotated[
     datetime,  # Тип данных datetime
     mapped_column(
-        default=datetime.now,
-        onupdate=datetime.now,  # При обновлении записи, автоматически устанавливается текущее время
-        # метод now не инициализируем, что он отрабатывал каждый раз при добавлении записи
+            default=datetime.now,
+            onupdate=datetime.now,  # При обновлении записи, автоматически устанавливается текущее время
+            # метод now не инициализируем, что он отрабатывал каждый раз при добавлении записи
     ),
 ]
 

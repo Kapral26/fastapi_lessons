@@ -189,41 +189,15 @@ class TaskRepository:
             task = query_result.scalar_one_or_none()
         return task
 
-    async def get_task_by_user(
-            self,
-            user_id: int,
-            task_id: int
-    ) -> TaskModel | None:
-        async with self.session_factory() as session:
-            query_result = await session.execute(
-                    select(
-                            TaskModel
-                    )
-                    .where(
-                            and_(
-                                    TaskModel.id == task_id,
-                                    TaskModel.user_id == user_id
-                            )
-                    )
-            )
-            task = query_result.scalar_one_or_none()
-        return task
-
     async def get_user_tasks(
             self,
             user_id: int,
-    ) -> list[TaskModel] | None:
+    ) -> Sequence[TaskModel]:
         async with self.session_factory() as session:
-            query_result = await session.execute(
-                    select(
-                            TaskModel
-                    )
-                    .where(
-                            TaskModel.user_id == user_id
-                    )
-            )
+            query = select(TaskModel).where(TaskModel.user_id == user_id)
+            query_result = await session.execute(query)
             user_tasks = query_result.scalars().all()
-        return user_tasks
+            return user_tasks
 
     async def delete_task(
             self,

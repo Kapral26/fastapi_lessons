@@ -1,7 +1,6 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import RedirectResponse
 
 from dependencies import get_auth_service
 from exceptions import UserNotFoundError, UserInvalidError

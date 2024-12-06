@@ -7,7 +7,6 @@ from starlette.status import HTTP_204_NO_CONTENT, HTTP_404_NOT_FOUND
 
 from dependencies import get_tasks_service, get_request_user_id
 from exceptions import TaskNotFoundError
-from models import TaskModel
 from schemas.tasks import TaskSchema, TaskCreateSchema
 from service.task_service import TaskService
 
@@ -53,7 +52,7 @@ async def create_task(
 async def get_task_by_name(
         task_name: str,
         task_service: Annotated[TaskService, Depends(get_tasks_service)],
-) -> TaskModel:
+) -> TaskSchema:
     """
     Получение задачи по имени.
 
@@ -79,7 +78,7 @@ async def get_task_by_name(
 async def get_task_by_id(
         task_id: int,
         task_service: Annotated[TaskService, Depends(get_tasks_service)],
-) -> TaskModel:
+) -> TaskSchema:
     """
     Получение задачи по идентификатору.
 
@@ -101,24 +100,23 @@ async def get_task_by_id(
     return task
 
 
-@router.get("/id/{task_id}", response_model=TaskSchema)
+@router.get("/users-tasks", response_model=list[TaskSchema])
 async def get_task_by_current_user(
-        task_id: int,
         task_service: Annotated[TaskService, Depends(get_tasks_service)],
         user_id: int = Depends(get_request_user_id)
-) -> TaskModel:
+) -> list[TaskSchema]:
     try:
-        task = await task_service.get_task_by_user(user_id, task_id)
+        tasks = await task_service.get_tasks_by_user(user_id)
     except TaskNotFoundError as error:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=error.detail)
-    return task
+    return tasks
 
 
-@router.get("/id/{user_id}", response_model=TaskSchema)
+@router.get("/users-tasks/{user_id}", response_model=list[TaskSchema])
 async def get_user_tasks(
         task_service: Annotated[TaskService, Depends(get_tasks_service)],
         user_id: int
-) -> TaskModel:
+) -> list[TaskSchema]:
     try:
         task = await task_service.get_user_tasks(user_id)
     except TaskNotFoundError as error:
