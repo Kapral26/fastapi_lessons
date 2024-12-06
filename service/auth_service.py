@@ -132,6 +132,6 @@ class AuthService:
             )
         except JWTError:
             raise TokenIsNotCorrectError
-        if payload["expire"] < dt.datetime.utcnow().timestamp():
+        if payload["expire"] < datetime.now(timezone.utc).timestamp():
             raise TokenExpiredError
         return payload["user_id"]

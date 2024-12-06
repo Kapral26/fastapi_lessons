@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import RedirectResponse
 
 from dependencies import get_auth_service
 from exceptions import UserNotFoundError, UserInvalidError
@@ -9,15 +10,15 @@ from schemas.users import UserSchema
 from service.auth_service import AuthService
 
 router = APIRouter(
-    prefix="/auth",
-    tags=["auth"],
+        prefix="/auth",
+        tags=["auth"],
 )
 
 
 @router.post("/login", response_model=UserLoginSchema)
 async def auth_user(
-    body: UserSchema,
-    user_repository: Annotated[AuthService, Depends(get_auth_service)],
+        body: UserSchema,
+        user_repository: Annotated[AuthService, Depends(get_auth_service)],
 ) -> UserLoginSchema:
     """
     Аутентифицирует пользователя.
@@ -36,7 +37,7 @@ async def auth_user(
     """
     try:
         user_login_result = await user_repository.user_login(
-            body.username, body.password
+                body.username, body.password
         )
     except UserNotFoundError as error:
         raise HTTPException(status_code=401, detail=error.detail)
