@@ -17,3 +17,5 @@ redis.dump
 /temp
 .DS_Store
 Thumbs.db
+app/cert
+*.pem

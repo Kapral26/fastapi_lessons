@@ -1,15 +1,18 @@
 from dataclasses import dataclass
+from datetime import timedelta
 from typing import TYPE_CHECKING
 
 from jose import jwt, JWTError
 
 from app.exceptions import UserNotFoundError, UserInvalidError, TokenIsNotCorrectError
-from app.users.users_profile import UserProfile
+from app.settings.main_settings import Settings
 from app.users.auth.schemas import UserLoginSchema
-from app.settings import Settings
+from app.users.users_profile import UserProfile, UserSchema
 
 if TYPE_CHECKING:
+    from app.users.auth.token.service import TokenService
     from app.users.users_profile import UserRepository
+
 
 
 @dataclass
@@ -32,6 +35,7 @@ class AuthService:
 
     user_repository: "UserRepository"
     settings: Settings
+    token_service: "TokenService"
 
     async def user_login(
             self,
@@ -139,3 +143,38 @@ class AuthService:
         except JWTError:
             raise TokenIsNotCorrectError
         return payload["user_id"]
+
+    def create_access_token(self, user: UserSchema) -> str:
+        """
+        Создает JWT-токен доступа для указанного пользователя.
+
+        :param user: Объект пользователя, для которого создается токен.
+        :return: Сгенерированный JWT-токен доступа.
+        """
+        jwt_payload = {
+            "sub": user.id,  # Обычно используется идентификатор пользователя.
+            "username": user.username,
+            "email": user.email,
+        }
+
+        return self.token_service.create_jwt(
+                self.settings.auth_jwt.access_token_type,
+                jwt_payload
+        )
+
+    def create_refresh_token(self, user: UserSchema) -> str:
+        """
+        Создает JWT-токен обновления для указанного пользователя.
+
+        :param user: Объект пользователя, для которого создается токен.
+        :return: Сгенерированный JWT-токен обновления.
+        """
+        jwt_payload = {
+            "sub": user.id,  # Для refresh токенв достаточно будет передавать id пользователя.
+        }
+
+        return self.token_service.create_jwt(
+                self.settings.auth_jwt.refresh_token_type,
+                jwt_payload,
+                expire_timedelta=timedelta(days=self.settings.auth_jwt.refresh_token_expire_days)
+        )

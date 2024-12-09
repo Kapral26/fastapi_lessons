@@ -1,20 +1,12 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class UserSchema(BaseModel):
-    """
-    Модель данных для пользователя.
-
-    Атрибуты:
-    username (str): Имя пользователя.
-    password (str): Пароль пользователя.
-
-    Класс Config:
-    from_attributes (bool): Флаг, указывающий, что атрибуты модели должны быть получены из атрибутов класса.
-    """
-
+    id: int
     username: str
-    password: str
+    password: bytes
+    email: EmailStr | None = None
+    active: bool = True
 
     class Config:
         """

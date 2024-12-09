@@ -3,13 +3,14 @@ from typing import Annotated
 from fastapi import Depends, security, Security, HTTPException
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN
 
+from app.exceptions import TokenIsNotCorrectError, TokenExpiredError
 from app.infrastructure.cache import get_redis_connection
 from app.infrastructure.database import async_session_factory
+from app.settings.main_settings import Settings
 from app.tasks import TaskRepository, TaskCacheRepository, TaskService
-from app.exceptions import TokenIsNotCorrectError, TokenExpiredError
 from app.users.auth import AuthService
+from app.users.auth.token.service import TokenService
 from app.users.users_profile import UserService, UserRepository
-from app.settings import Settings
 
 
 async def get_tasks_repository() -> TaskRepository:
@@ -86,8 +87,14 @@ async def get_user_repository() -> UserRepository:
     return UserRepository(session_factory=async_session_factory)
 
 
+def get_token_service() -> TokenService:
+    """Функция для получения экземпляра класса TokenService."""
+    return TokenService(settings=Settings())
+
+
 async def get_auth_service(
         user_repository: Annotated[UserRepository, Depends(get_user_repository)],
+        token_service: Annotated[TokenService, Depends(get_token_service)],
 ) -> AuthService:
     """
     Функция для получения экземпляра класса AuthService.
@@ -105,7 +112,7 @@ async def get_auth_service(
     Экземпляр класса UserRepository передается в качестве параметра функции и
      используется для создания экземпляра класса AuthService.
     """
-    return AuthService(user_repository=user_repository, settings=Settings())
+    return AuthService(user_repository=user_repository, settings=Settings(), token_service=token_service)
 
 
 def get_user_service(

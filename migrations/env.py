@@ -4,7 +4,7 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from app.infrastructure.database import Base
-from app.settings import Settings
+from app.settings.main_settings import Settings
 from app.tasks import TaskModel
 from app.users.users_profile import UserProfile
 
