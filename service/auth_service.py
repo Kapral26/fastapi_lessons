@@ -1,10 +1,9 @@
 from dataclasses import dataclass
-from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 from jose import jwt, JWTError
 
-from exceptions import UserNotFoundError, UserInvalidError, TokenExpiredError, TokenIsNotCorrectError
+from exceptions import UserNotFoundError, UserInvalidError, TokenIsNotCorrectError
 from models import UserProfile
 from schemas import UserLoginSchema
 from settings import Settings
@@ -120,10 +119,17 @@ class AuthService:
 
         return token
 
-    async def get_user_id_from_access_token(
+    def get_user_id_from_access_token(
             self,
             access_token: str
     ) -> int | None:
+        """
+        Функция для получения идентификатора пользователя из токена доступа.
+
+        :param access_token: Токен доступа.
+        :return: Идентификатор пользователя или None, если токен некорректен.
+        :raises TokenIsNotCorrectError: Если токен некорректен.
+        """
         try:
             payload = jwt.decode(
                     access_token,

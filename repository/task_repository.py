@@ -65,6 +65,12 @@ class TaskRepository:
             task_data: TaskCreateSchema,
             user_id: int
     ) -> int:
+        """
+        Создание задачи.
+        :param task_data: Объект задачи.
+        :param user_id: Идентификатор пользователя.
+        :return: Созданная задача.
+        """
         query = (
             insert(
                     TaskModel
@@ -193,6 +199,11 @@ class TaskRepository:
             self,
             user_id: int,
     ) -> Sequence[TaskModel]:
+        """
+        Возвращает список задач, созданных пользователем.
+        :param user_id: Идентификатор пользователя.
+        :return: Список задач.
+        """
         async with self.session_factory() as session:
             query = select(TaskModel).where(TaskModel.user_id == user_id)
             query_result = await session.execute(query)

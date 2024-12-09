@@ -106,7 +106,7 @@ async def get_task_by_current_user(
         user_id: int = Depends(get_request_user_id)
 ) -> list[TaskSchema]:
     try:
-        tasks = await task_service.get_tasks_by_user(user_id)
+        tasks = await task_service.get_tasks_by_current_user(user_id)
     except TaskNotFoundError as error:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=error.detail)
     return tasks
@@ -169,6 +169,6 @@ async def _delete_task(
     - task_id: Идентификатор задачи.
     """
     try:
-        await task_service.delete_task(task_id, user_id)
+        await task_service.delete_task(task_id)
     except TaskNotFoundError as error:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=error.detail)

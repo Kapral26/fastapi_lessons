@@ -53,6 +53,12 @@ class TaskService:
             body: TaskCreateSchema,
             user_id: int
     ) -> TaskSchema:
+        """
+        Создает задачу и предоставляет о ней информацию.
+        :param body: Объект TaskCreateSchema
+        :param user_id: Идентификатор пользователя.
+        :return: Информация о задаче.
+        """
         task_id = await self.task_repository.create_task(body, user_id)
         task = await self.task_repository.get_task_by_id(task_id)
         return TaskSchema.model_validate(task)
@@ -63,6 +69,14 @@ class TaskService:
             name: str,
             user_id: int
     ) -> TaskSchema:
+        """
+        Обновляет имя задачи.
+        :param task_id: Идентификатор задачи
+        :param name: Новое имя задачи.
+        :param user_id: Идентификатор пользователя.
+        :raise TaskNotFoundError: Если задачи для обновления не существует.
+        :return: Обновленная задача.
+        """
         updated_task = await self.task_repository.update_task_name(task_id, name, user_id)
         if not updated_task:
             raise TaskNotFoundError
@@ -71,8 +85,12 @@ class TaskService:
     async def delete_task(
             self,
             task_id: int,
-            user_id: int
     ) -> None:
+        """
+        Удаляет задачу.
+        :param task_id: Идентификатор задачи
+        :raise TaskNotFoundError: Если задачи для обновления не существует.
+        """
         updated_task = await self.task_repository.delete_task(task_id)
         await self.task_cache_repository.delete_task(task_id)
         if not updated_task:
@@ -82,6 +100,11 @@ class TaskService:
             self,
             task_id: int
     ) -> TaskSchema:
+        """
+        Возвращает информацию о задаче на основании идентификатора.
+        :param task_id: Идентификатор задачи
+        :raise TaskNotFoundError: Если задачи для обновления не существует.
+        """
         task = await self.task_repository.get_task_by_id(task_id)
         if not task:
             raise TaskNotFoundError
@@ -91,15 +114,26 @@ class TaskService:
             self,
             name: str
     ) -> TaskSchema:
+        """
+        Возвращает информацию о задаче на основании названия.
+        :param name: Название задачи
+        :raise TaskNotFoundError: Если задачи для обновления не существует.
+        """
         task = await self.task_repository.get_task_by_name(name)
         if not task:
             raise TaskNotFoundError
         return TaskSchema.model_validate(task)
 
-    async def get_tasks_by_user(
+    async def get_tasks_by_current_user(
             self,
             user_id: int,
     ) -> list[TaskSchema]:
+        """
+        Возвращает список задач, созданных авторизованным пользователем.
+        :param user_id: Идентификатор авторизованного пользователя.
+        :raise TaskNotFoundError: Если задачи для обновления не существует.
+        :return: Задачи пользователя.
+        """
         tasks = await self.task_repository.get_user_tasks(user_id)
         if not tasks:
             raise TaskNotFoundError
@@ -109,6 +143,12 @@ class TaskService:
             self,
             user_id: int
     ) -> list[TaskSchema]:
+        """
+        Возвращает список задач, созданных указанным пользователем.
+        :param user_id: Идентификатор пользователя.
+        :raise TaskNotFoundError: Если задачи для обновления не существует.
+        :return: Задачи пользователя.
+        """
         if user_tasks := await self.task_cache_repository.get_user_tasks(user_id):
             pass
         else:

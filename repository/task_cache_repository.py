@@ -85,7 +85,13 @@ class TaskCacheRepository:
     async def delete_task(
             self,
             task_id: int
-    ):
+    ) -> None:
+        """
+        Удаляет задачу с указанным идентификатором из списка задач.
+
+        :param task_id: Идентификатор задачи, которую нужно удалить.
+        :raises TaskNotFoundError: Если задача с указанным идентификатором не найдена.
+        """
         tasks = await self.get_tasks()
         if tasks:
             new_tasks = [task for task in tasks if task.id != task_id]
@@ -101,7 +107,13 @@ class TaskCacheRepository:
     async def get_user_tasks(
             self,
             user_id: int
-    ):
+    ) -> list[TaskSchema] | None:
+        """
+        Возвращает список задач пользователя.
+
+        :param user_id: Идентификатор пользователя.
+        :raises TaskNotFoundError: Если задача с указанным идентификатором не найдена.
+        """
         if not self.redis.exists(user_id):
             return None
 

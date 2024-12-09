@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Annotated
 
 from sqlalchemy import create_engine
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.orm import sessionmaker, DeclarativeBase, Mapped, mapped_column
 
 from settings import Settings

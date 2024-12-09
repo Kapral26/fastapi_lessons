@@ -109,28 +109,19 @@ async def get_auth_service(
     return AuthService(user_repository=user_repository, settings=Settings())
 
 
-async def get_user_service(
+def get_user_service(
         user_repository: Annotated[UserRepository, Depends(get_user_repository)],
         auth_service: Annotated[AuthService, Depends(get_auth_service)],
 ) -> UserService:
     """
-    Функция для получения экземпляра класса UserService.
+    Функция для получения экземпляра UserService.
 
-    Параметры:
-    user_repository (Annotated[UserRepository, Depends(get_user_repository)]): Экземпляр класса UserRepository,
-    который используется для работы с пользователями в базе данных.
-    auth_service (Annotated[AuthService, Depends(get_auth_service)]): Экземпляр класса AuthService,
-    который используется для работы с аутентификацией пользователей.
-
-    Возвращает:
-    UserService: Экземпляр класса UserService, который используется для работы с пользователями.
-
-    Примечание:
-    Эта функция используется для получения экземпляра класса UserService,
-    который используется для работы с пользователями. Экземпляры классов UserRepository и AuthService
-    передаются в качестве параметров функции и используются для создания экземпляра класса UserService.
+    :param user_repository: Репозиторий пользователей.
+    :param auth_service: Сервис аутентификации.
+    :return: Экземпляр UserService.
     """
     return UserService(user_repository=user_repository, auth_service=auth_service)
+
 
 
 reusable_oauth2 = security.HTTPBearer()
@@ -140,6 +131,14 @@ async def get_request_user_id(
         auth_service: Annotated[AuthService, Depends(get_auth_service)],
         token: security.http.HTTPAuthorizationCredentials = Security(reusable_oauth2),  # noqa: B008
 ) -> int:
+    """
+    Функция для получения идентификатора пользователя из токена доступа.
+
+    :param auth_service: Сервис аутентификации.
+    :param token: Объект с данными токена доступа.
+    :return: Идентификатор пользователя.
+    :raises HTTPException: Если токен некорректен или истек срок его действия.
+    """
     try:
         user_id = await auth_service.get_user_id_from_access_token(token.credentials)
     except TokenIsNotCorrectError as error:
@@ -149,3 +148,4 @@ async def get_request_user_id(
     except TokenExpiredError as error:
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail=error.detail)
     return user_id
+

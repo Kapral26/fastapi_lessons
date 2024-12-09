@@ -21,11 +21,18 @@ class UserInvalidError(Exception):
 
 
 class TokenExpiredError(Exception):
+    """Исключение, возникающее при истечении срока действия токена."""
+
     detail = "Token expired"
 
 
 class TokenIsNotCorrectError(Exception):
+    """Исключение, возникающее при некорректности токена."""
+
     detail = "Token is not correct"
 
+
 class TaskNotFoundError(Exception):
+    """Исключение, возникающее при отсутствии задачи."""
+
     detail = "Task not found"
