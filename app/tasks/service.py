@@ -1,9 +1,7 @@
 from dataclasses import dataclass
 
 from app.exceptions import TaskNotFoundError
-from app.repository.task_cache_repository import TaskCacheRepository
-from app.repository.task_repository import TaskRepository
-from app.schemas import TaskSchema, TaskCreateSchema
+from app.tasks import TaskCacheRepository, TaskRepository, TaskSchema, TaskCreateSchema
 
 
 @dataclass

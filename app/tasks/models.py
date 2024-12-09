@@ -1,7 +1,7 @@
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.infrastructure.database.database import Base, intpk
+from app.infrastructure.database import Base, intpk
 from app.settings import Settings
 
 settings = Settings()

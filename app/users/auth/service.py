@@ -4,12 +4,12 @@ from typing import TYPE_CHECKING
 from jose import jwt, JWTError
 
 from app.exceptions import UserNotFoundError, UserInvalidError, TokenIsNotCorrectError
-from app.models import UserProfile
-from app.schemas import UserLoginSchema
+from app.users.users_profile import UserProfile
+from app.users.auth.schemas import UserLoginSchema
 from app.settings import Settings
 
 if TYPE_CHECKING:
-    from app.repository import UserRepository
+    from app.users.users_profile import UserRepository
 
 
 @dataclass

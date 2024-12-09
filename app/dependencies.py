@@ -6,10 +6,9 @@ from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN
 from app.infrastructure.cache import get_redis_connection
 from app.infrastructure.database import async_session_factory
 from exceptions import TokenIsNotCorrectError, TokenExpiredError
-from app.repository import TaskRepository, TaskCacheRepository, UserRepository
-from app.service import TaskService
-from app.service import AuthService
-from app.service.user_service import UserService
+from app.tasks import TaskRepository, TaskCacheRepository, TaskService
+from app.users.auth import AuthService
+from app.users.users_profile import UserService, UserRepository
 from settings import Settings
 
 

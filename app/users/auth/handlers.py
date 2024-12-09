@@ -4,8 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from app.dependencies import get_auth_service
 from app.exceptions import UserNotFoundError, UserInvalidError
-from app.schemas import UserLoginSchema, UserSchema
-from app.service.auth_service import AuthService
+from app.users.users_profile.schemas import UserSchema
+from app.users.auth import UserLoginSchema
+from app.users.auth import AuthService
 
 router = APIRouter(
         prefix="/auth",

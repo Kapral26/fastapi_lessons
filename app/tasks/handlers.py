@@ -7,8 +7,8 @@ from starlette.status import HTTP_204_NO_CONTENT, HTTP_404_NOT_FOUND
 
 from app.dependencies import get_tasks_service, get_request_user_id
 from app.exceptions import TaskNotFoundError
-from app.schemas.tasks import TaskSchema, TaskCreateSchema
-from app.service.task_service import TaskService
+from app.tasks import TaskSchema, TaskCreateSchema
+from app.tasks import TaskService
 
 # APIRouter - Дает возможность регистрировать роуты
 
@@ -44,6 +44,12 @@ async def create_task(
         task_service: Annotated[TaskService, Depends(get_tasks_service)],
         user_id: int = Depends(get_request_user_id),
 ) -> TaskSchema:
+    """
+    Создание задачи.
+    :param body: Тело запроса.
+    :param task_service: Сервис работы с задачами.
+    :param user_id: Id_авторизованного пользователя.
+    """
     task = await task_service.create_task(body, user_id)
     return task
 
@@ -105,6 +111,12 @@ async def get_task_by_current_user(
         task_service: Annotated[TaskService, Depends(get_tasks_service)],
         user_id: int = Depends(get_request_user_id)
 ) -> list[TaskSchema]:
+    """
+    Получить список задач текущего пользователя.
+    :param task_service: Сервис работы с задачами.
+    :param user_id: Id_авторизованного пользователя.
+    :return: Список задач текущего пользователя.
+    """
     try:
         tasks = await task_service.get_tasks_by_current_user(user_id)
     except TaskNotFoundError as error:
@@ -117,6 +129,12 @@ async def get_user_tasks(
         task_service: Annotated[TaskService, Depends(get_tasks_service)],
         user_id: int
 ) -> list[TaskSchema]:
+    """
+    Получить список задач текущего пользователя.
+    :param task_service: Сервис работы с задачами.
+    :param user_id: Id_авторизованного пользователя.
+    :return: Список задач текущего пользователя.
+    """
     try:
         task = await task_service.get_user_tasks(user_id)
     except TaskNotFoundError as error:

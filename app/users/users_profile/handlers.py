@@ -3,8 +3,9 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.dependencies import get_user_service
-from app.schemas import UserLoginSchema, UserSchema
-from app.service.user_service import UserService
+from app.users.users_profile.schemas import UserSchema
+from app.users.auth.schemas import UserLoginSchema
+from app.users.users_profile.service import UserService
 
 router = APIRouter(
     prefix="/users",

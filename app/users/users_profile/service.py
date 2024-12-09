@@ -1,12 +1,12 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from app.repository import UserRepository
-from app.schemas import UserLoginSchema
+from app.users.users_profile import UserRepository
+from app.users.auth.schemas import UserLoginSchema
 
 if TYPE_CHECKING:
-    from app.models import UserProfile
-    from app.service.auth_service import AuthService
+    from app.users.users_profile import UserProfile
+    from app.users.auth.service import AuthService
 
 
 @dataclass

@@ -4,7 +4,7 @@ from typing import TypeVar, Callable
 from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import UserProfile
+from app.users.users_profile import UserProfile
 
 T = TypeVar("T")
 
