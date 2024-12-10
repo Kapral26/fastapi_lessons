@@ -2,7 +2,7 @@ import json
 
 from redis import asyncio as Redis  # noqa: N812
 
-from app.schemas.tasks import TaskSchema
+from app.tasks.schemas import TaskSchema
 
 
 class TaskCacheRepository:

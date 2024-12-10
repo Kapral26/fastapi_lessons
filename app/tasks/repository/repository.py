@@ -5,8 +5,8 @@ from sqlalchemy import select, update, delete, insert, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models import TaskModel, CategoryModel
-from app.schemas import TaskCreateSchema
+from app.tasks.models import TaskModel, CategoryModel
+from app.tasks.schemas import TaskCreateSchema
 
 T = TypeVar(
         "T"

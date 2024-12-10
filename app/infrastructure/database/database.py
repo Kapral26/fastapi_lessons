@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.orm import sessionmaker, DeclarativeBase, Mapped, mapped_column
 
-from app.settings import Settings
+from app.settings.main_settings import Settings
 
 settings = Settings()
 

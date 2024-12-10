@@ -1,8 +1,8 @@
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.infrastructure.database.database import Base, intpk
-from app.settings import Settings
+from app.infrastructure.database import Base, intpk
+from app.settings.main_settings import Settings
 
 settings = Settings()
 
@@ -27,7 +27,7 @@ class CategoryModel(Base):
     name: Mapped[str]
     type: Mapped[str | None]
     tasks: Mapped[list["TaskModel"]] = relationship(
-        back_populates="category",
+            back_populates="category",
     )
 
 
@@ -52,13 +52,24 @@ class TaskModel(Base):
     name: Mapped[str]
     pomodoro_count: Mapped[int]
     category_id: Mapped[int] = mapped_column(
-        ForeignKey(
-            "category.id",
-            ondelete="SET NULL",
-        )
+            ForeignKey(
+                    "category.id",
+                    ondelete="SET NULL",
+            )
     )
     user_id: Mapped[int] = mapped_column(ForeignKey("user_profile.id"), nullable=False)
 
     category: Mapped[CategoryModel] = relationship(
-        back_populates="tasks",
+            back_populates="tasks",
+    )
+
+    # Дополнительные параметры модели
+    __table_args__ = (
+        # Индекс на поле name
+        Index(
+                "name_idx",
+                "name",
+                "user_id",
+                unique=True
+        ),
     )
