@@ -11,7 +11,9 @@ from pathlib import Path
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-dotenv_path = Path(__file__).parent.parent.absolute() / ".dev.env"
+from app.settings.auth_settings import AuthJWT
+
+dotenv_path = Path(__file__).parent.parent.parent.absolute() / ".dev.env"
 
 
 class Settings(BaseSettings):
@@ -37,6 +39,8 @@ class Settings(BaseSettings):
     jwt_secret_key: SecretStr = Field(..., alias="JWT_SECRET_KEY")
     jwt_algorithm: str = Field(..., alias="JWT_ALGORITHM")
     jwt_token_lifetime: int = Field(..., alias="jwt_token_lifetime")
+
+    auth_jwt: AuthJWT = AuthJWT()
 
     # Свойства, которые генерируют URL-адреса подключения к PostgreSQL с использованием разных драйверов
     @property
@@ -79,5 +83,4 @@ class Settings(BaseSettings):
 # который можно далее импортировать из разных мест
 
 if __name__ == "__main__":
-    config = Settings()
-    a = 1
+    settings = Settings()

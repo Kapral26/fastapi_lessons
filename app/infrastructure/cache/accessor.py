@@ -1,6 +1,6 @@
 from redis import asyncio as redis
 
-from app.settings import Settings
+from app.settings.main_settings import Settings
 
 settings = Settings()
 

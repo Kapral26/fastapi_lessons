@@ -18,8 +18,9 @@ faker = "^33.0.0"
 psycopg = "^3.2.3"
 psycopg-binary = "^3.2.3"
 redis = "^5.2.0"
-python-jose = "^3.3.0"
 datetime = "^5.5"
+bcrypt = "^4.2.1"
+pyjwt = {extras = ["crypto"], version = "^2.10.1"}
 
 
 [build-system]
@@ -83,7 +84,8 @@ lint.ignore = [
     "ANN204",
     "TRY003",
     "B904",
-    "ANN101"
+    "ANN101",
+    "S101"
 ]
 # Разрешить автоматическое исправление всех включенных правил (при использовании `--fix`)
 [lint]

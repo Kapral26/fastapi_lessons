@@ -25,24 +25,21 @@ class UserRepository:
 
     session_factory: Callable[[T], AsyncSession]
 
-    async def create_user(self, username: str, password: str) -> UserProfile:
-        """
-        Создает нового пользователя.
-
-        Описание:
-        - Создает новую запись в базе данных с указанными именем и паролем.
-        - Возвращает созданного пользователя.
-
-        Аргументы:
-        - username: Имя пользователя.
-        - password: Пароль пользователя.
-
-        Возвращает:
-        - Созданного пользователя.
-        """
+    async def create_user(
+            self,
+            username: str,
+            password: bytes,
+            email: str,
+            active: bool = True,
+    ) -> UserProfile:
         stmnt = (
             insert(UserProfile)
-            .values(username=username, password=password)
+            .values(
+                    username=username,
+                    password=password,
+                    email=email,
+                    active=active,
+            )
             .returning(UserProfile.id)
         )
 

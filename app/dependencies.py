@@ -1,15 +1,18 @@
 from typing import Annotated
 
 from fastapi import Depends, security, Security, HTTPException
+from jwt import InvalidTokenError
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN
 
+from app.exceptions import TokenIsNotCorrectError, TokenExpiredError
 from app.infrastructure.cache import get_redis_connection
 from app.infrastructure.database import async_session_factory
+from app.settings.main_settings import Settings
 from app.tasks import TaskRepository, TaskCacheRepository, TaskService
-from app.exceptions import TokenIsNotCorrectError, TokenExpiredError
 from app.users.auth import AuthService
-from app.users.users_profile import UserService, UserRepository
-from app.settings import Settings
+from app.users.auth.exceptions import InvalidAuthTokenError
+from app.users.auth.token.service import TokenService, ouath2_bearer
+from app.users.users_profile import UserService, UserRepository, UserSchema
 
 
 async def get_tasks_repository() -> TaskRepository:
@@ -86,8 +89,14 @@ async def get_user_repository() -> UserRepository:
     return UserRepository(session_factory=async_session_factory)
 
 
+def get_token_service() -> TokenService:
+    """Функция для получения экземпляра класса TokenService."""
+    return TokenService(settings=Settings())
+
+
 async def get_auth_service(
         user_repository: Annotated[UserRepository, Depends(get_user_repository)],
+        token_service: Annotated[TokenService, Depends(get_token_service)],
 ) -> AuthService:
     """
     Функция для получения экземпляра класса AuthService.
@@ -105,7 +114,7 @@ async def get_auth_service(
     Экземпляр класса UserRepository передается в качестве параметра функции и
      используется для создания экземпляра класса AuthService.
     """
-    return AuthService(user_repository=user_repository, settings=Settings())
+    return AuthService(user_repository=user_repository, settings=Settings(), token_service=token_service)
 
 
 def get_user_service(
@@ -146,3 +155,49 @@ async def get_request_user_id(
     except TokenExpiredError as error:
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail=error.detail)
     return user_id
+
+
+def get_token_payload(
+        token_service: Annotated[TokenService, Depends(get_token_service)],
+        token: str = Depends(ouath2_bearer)
+) -> dict:
+    """
+    Декодирует JWT-токен и возвращает полезную нагрузку.
+
+    :param token_service:
+    :param token: JWT-токен, переданный через зависимость OAuth2PasswordBearer.
+    :return: Раскодированные данные токена.
+    :raises InvalidAuthTokenError: Если токен некорректен.
+    """
+    try:
+        if decoded_payload := token_service.decode_jwt(token):
+            return decoded_payload
+    except InvalidTokenError as e:
+        raise InvalidAuthTokenError(e)
+    raise InvalidAuthTokenError
+
+
+class UserGetterFromToken:
+    """
+    Класс для получения пользователя из токена.
+
+    :param token_type: Тип токена.
+    """
+
+    def __init__(self, token_type: str):
+        self.token_type = token_type
+
+    async def __call__(
+            self,
+            token_service: Annotated[TokenService, Depends(get_token_service)],
+            user_service: Annotated[UserService, Depends(get_user_service)],
+            payload: dict = Depends(get_token_payload),
+    ) -> UserSchema:
+        """
+        Функция для получения пользователя из токена.
+
+        :param payload: Пейлоад токена.
+        :return: Объект пользователя.
+        """
+        token_service.validate_token_type(payload, self.token_type)
+        return await user_service.get_user_by_token_sub(payload)
