@@ -1,9 +1,13 @@
 from dataclasses import dataclass
 from datetime import timedelta, datetime, timezone
 
-from jose import jwt
+import jwt
+from fastapi.security import OAuth2PasswordBearer
 
 from app.settings.main_settings import Settings
+from app.users.auth.exceptions import InvalidAuthTokenError
+
+ouath2_bearer = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 @dataclass
@@ -91,3 +95,17 @@ class TokenService:
         decoded = jwt.decode(token, public_key, algorithms=[algorithm])
         return decoded
 
+    def validate_token_type(
+            self,
+            payload: dict,
+            token_type: str
+    ) -> None:
+        """
+        Функция для проверки типа токена.
+
+        :param payload: Пейлоад токена.
+        :param token_type: Тип токена.
+        :raises InvalidAuthTokenError: Если тип токена не совпадает с ожидаемым.
+        """
+        if payload.get(self.settings.auth_jwt.access_token_field) != token_type:
+            raise InvalidAuthTokenError

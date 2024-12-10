@@ -28,7 +28,7 @@ class UserRepository:
     async def create_user(
             self,
             username: str,
-            password: str,
+            password: bytes,
             email: str,
             active: bool = True,
     ) -> UserProfile:

@@ -15,6 +15,7 @@ class UserLoginSchema(BaseModel):
 
     user_id: int = Field(..., alias="id")
     access_token: str
+    refresh_token: str
 
     class Config:
         """

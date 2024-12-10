@@ -1,4 +1,4 @@
-from sqlalchemy import Index
+from sqlalchemy import Index, LargeBinary
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.infrastructure.database.database import Base, intpk
@@ -21,7 +21,7 @@ class UserProfile(Base):
 
     id: Mapped[intpk]
     username: Mapped[str] = mapped_column(nullable=False)
-    password: Mapped[str] = mapped_column(nullable=False)
+    password: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
     email: Mapped[str | None] = None
     active: Mapped[bool] = mapped_column(default=False)
 

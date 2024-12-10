@@ -3,10 +3,10 @@ from pydantic import BaseModel, EmailStr
 
 class UserSchema(BaseModel):
     id: int
+    active: bool = True
     username: str
     password: bytes
     email: EmailStr | None = None
-    active: bool = True
 
     class Config:
         """
@@ -17,3 +17,9 @@ class UserSchema(BaseModel):
         """
 
         from_attributes = True
+
+
+class UsersCreateSchema(BaseModel):
+    username: str
+    password: str
+    email: EmailStr | None = None

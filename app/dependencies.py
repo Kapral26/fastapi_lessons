@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import Depends, security, Security, HTTPException
+from jwt import InvalidTokenError
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN
 
 from app.exceptions import TokenIsNotCorrectError, TokenExpiredError
@@ -9,8 +10,9 @@ from app.infrastructure.database import async_session_factory
 from app.settings.main_settings import Settings
 from app.tasks import TaskRepository, TaskCacheRepository, TaskService
 from app.users.auth import AuthService
-from app.users.auth.token.service import TokenService
-from app.users.users_profile import UserService, UserRepository
+from app.users.auth.exceptions import InvalidAuthTokenError
+from app.users.auth.token.service import TokenService, ouath2_bearer
+from app.users.users_profile import UserService, UserRepository, UserSchema
 
 
 async def get_tasks_repository() -> TaskRepository:
@@ -153,3 +155,49 @@ async def get_request_user_id(
     except TokenExpiredError as error:
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail=error.detail)
     return user_id
+
+
+def get_token_payload(
+        token_service: Annotated[TokenService, Depends(get_token_service)],
+        token: str = Depends(ouath2_bearer)
+) -> dict:
+    """
+    Декодирует JWT-токен и возвращает полезную нагрузку.
+
+    :param token_service:
+    :param token: JWT-токен, переданный через зависимость OAuth2PasswordBearer.
+    :return: Раскодированные данные токена.
+    :raises InvalidAuthTokenError: Если токен некорректен.
+    """
+    try:
+        if decoded_payload := token_service.decode_jwt(token):
+            return decoded_payload
+    except InvalidTokenError as e:
+        raise InvalidAuthTokenError(e)
+    raise InvalidAuthTokenError
+
+
+class UserGetterFromToken:
+    """
+    Класс для получения пользователя из токена.
+
+    :param token_type: Тип токена.
+    """
+
+    def __init__(self, token_type: str):
+        self.token_type = token_type
+
+    async def __call__(
+            self,
+            token_service: Annotated[TokenService, Depends(get_token_service)],
+            user_service: Annotated[UserService, Depends(get_user_service)],
+            payload: dict = Depends(get_token_payload),
+    ) -> UserSchema:
+        """
+        Функция для получения пользователя из токена.
+
+        :param payload: Пейлоад токена.
+        :return: Объект пользователя.
+        """
+        token_service.validate_token_type(payload, self.token_type)
+        return await user_service.get_user_by_token_sub(payload)
