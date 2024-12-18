@@ -3,7 +3,7 @@
 from pydantic import BaseModel
 
 
-class TokenInfo(BaseModel):
+class TokenResponseInfo(BaseModel):
     """
     Модель данных для информации о токене.
 

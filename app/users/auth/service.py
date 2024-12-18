@@ -6,7 +6,7 @@ import bcrypt
 
 from app.settings.main_settings import Settings
 from app.users.auth.exceptions import UnauthorisedError, UserIsNotActiveError
-from app.users.auth.token.schemas import TokenInfo
+from app.users.auth.token.schemas import TokenResponseInfo
 from app.users.users_profile import UserSchema
 
 if TYPE_CHECKING:
@@ -39,8 +39,8 @@ class AuthService:
     async def user_login(
             self,
             user: UserSchema
-    ) -> TokenInfo | None:
-        return TokenInfo(
+    ) -> TokenResponseInfo | None:
+        return TokenResponseInfo(
                 access_token=self.create_access_token(user),
                 refresh_token=self.create_refresh_token(user)
         )
